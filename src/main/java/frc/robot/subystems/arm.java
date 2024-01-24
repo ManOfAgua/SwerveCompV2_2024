@@ -65,7 +65,7 @@ public class arm extends SubsystemBase {
     //     final double target_Height = Units.inchesToMeters(55.125);
     //     final double camera_Pitch = Units.degreesToRadians(0);
     //     double noTarget_Angle = 0;
-    //     double horzoffSet = Units.inchesToMeters(5); //TODO: Horizontal offset from the shooter to the camera
+    //     double horzoffSet = Units.inchesToMeters(5);
     //     double vertoffSet = Units.inchesToMeters(24.875);
         
     //     var result = photonCamera.getLatestResult();

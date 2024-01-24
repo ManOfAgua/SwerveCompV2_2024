@@ -7,20 +7,35 @@ import frc.robot.CommandSwerveDrivetrain;
 
 
 public class Disable extends Command{
-    TalonFX FL = new TalonFX(6);
-    TalonFX FR = new TalonFX(8);
-    TalonFX BL = new TalonFX(2);
-    TalonFX BR = new TalonFX(4);
+    TalonFX lfDrive = new TalonFX(3);
+    TalonFX lfSteer = new TalonFX(2);
+
+    TalonFX lbDrive = new TalonFX(1);
+    TalonFX lbSteer = new TalonFX(0);
+
+    TalonFX rfDrive = new TalonFX(4);
+    TalonFX rfSteer = new TalonFX(5);
+
+    TalonFX rbDrive = new TalonFX(6);
+    TalonFX rbSteer = new TalonFX(7);
     
 public Disable (CommandSwerveDrivetrain s_Swerve){
     addRequirements(s_Swerve);
 }
 @Override
 public void execute(){
-    FL.setNeutralMode(NeutralModeValue.Coast);
-    FR.setNeutralMode(NeutralModeValue.Coast);
+    lfDrive.setNeutralMode(NeutralModeValue.Coast);
+    lfSteer.setNeutralMode(NeutralModeValue.Coast);
 
-    BL.setNeutralMode(NeutralModeValue.Coast);
-    BR.setNeutralMode(NeutralModeValue.Coast);
+    lbDrive.setNeutralMode(NeutralModeValue.Coast);
+    lbSteer.setNeutralMode(NeutralModeValue.Coast);
+
+    rfDrive.setNeutralMode(NeutralModeValue.Coast);
+    rfSteer.setNeutralMode(NeutralModeValue.Coast);
+
+    rbDrive.setNeutralMode(NeutralModeValue.Coast);
+    rbSteer.setNeutralMode(NeutralModeValue.Coast);
+
+
 }
 }

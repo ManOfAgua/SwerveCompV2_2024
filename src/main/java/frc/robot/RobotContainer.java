@@ -19,11 +19,13 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.ArmPIDCommand;
+import frc.robot.commands.CascadeCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.disabled.Disable;
 import frc.robot.subystems.arm;
+import frc.robot.subystems.cascade;
 import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
@@ -47,15 +49,17 @@ public class RobotContainer {
   private final JoystickButton tri = new JoystickButton(driver, ControllerConstants.b_TRI); //Might be Robot Centric??
   private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
   private final JoystickButton shootButton = new JoystickButton(driver, ControllerConstants.b_X);
-  private final JoystickButton intakeRevButton = new JoystickButton(driver, ControllerConstants.b_SQR);
   private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_MIC);
-  private final JoystickButton cascadeButton = new JoystickButton(driver, 0);
+//   private final JoystickButton cascadeButton = new JoystickButton(driver, 0);
 
                               /*Operator Buttons */
   private final JoystickButton armFwdButton = new JoystickButton(operator, ControllerConstants.b_L2);
   private final JoystickButton armBckButton = new JoystickButton(operator, ControllerConstants.b_R2);
-  private final JoystickButton sourceButton = new JoystickButton(operator, 0);
-  private final JoystickButton ampButton = new JoystickButton(operator, 0);
+  private final JoystickButton cascadeUpButton = new JoystickButton(operator, ControllerConstants.b_L1);
+  private final JoystickButton cascadeDwnButton = new JoystickButton(operator, ControllerConstants.b_R1);
+
+//   private final JoystickButton sourceButton = new JoystickButton(operator, 0);
+//   private final JoystickButton ampButton = new JoystickButton(operator, 0);
 
 
 
@@ -63,15 +67,17 @@ public class RobotContainer {
   private final arm armSub = new arm();
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
+  private final cascade cascadeSub = new cascade();
 
 
                               /* Commands */
-  private final ManualArmCommand armFwdCommand = new ManualArmCommand(0.15, armSub);
-  private final ManualArmCommand armBckCommand = new ManualArmCommand(-0.15, armSub);
-  private final ShooterCommand shootCommand = new ShooterCommand(1, shooterSub);
+  private final ManualArmCommand armFwdCommand = new ManualArmCommand(0.3, armSub);
+  private final ManualArmCommand armBckCommand = new ManualArmCommand(-0.3, armSub);
+  private final ShooterCommand shootCommand = new ShooterCommand(1, shooterSub); //may change speed
   private final IntakeCommand intakeCommand = new IntakeCommand(0.4, intakeSub);
-  private final IntakeCommand intakeRevCommand = new IntakeCommand(-0.2, intakeSub);
-  private final ShooterCommand shootRevCommand = new ShooterCommand(-0.65, shooterSub);
+  private final CascadeCommand cascadeUpCommand = new CascadeCommand(0.10, cascadeSub);
+  private final CascadeCommand cascadeDwnCommand = new CascadeCommand(-0.10, cascadeSub);
+
   private final ArmPIDCommand armSourceCommand = new ArmPIDCommand(1, armSub);
 
 
@@ -108,14 +114,18 @@ public class RobotContainer {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     drivetrain.registerTelemetry(logger::telemeterize);
-    
-    /*Buttons */
+                                        /*Driver Buttons*/
+        
+
+
+
+                                        /*Operator Buttons*/
         shootButton.whileTrue(shootCommand);
         intakeButton.whileTrue(intakeCommand);
-        intakeRevButton.whileTrue(intakeRevCommand);
-        intakeRevButton.whileTrue(shootRevCommand);
         armFwdButton.whileTrue(armFwdCommand);
         armBckButton.whileTrue(armBckCommand);
+        cascadeUpButton.whileTrue(cascadeUpCommand);
+        cascadeDwnButton.whileTrue(cascadeDwnCommand);
 
   }
 

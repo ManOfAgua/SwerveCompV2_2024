@@ -9,13 +9,13 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackTy
 
 import edu.wpi.first.math.util.Units;
 
-public class Constants {
+public class Constants { //TODO: Tune it
     // Both sets of gains need to be tuned to your individual robot.
 
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(100).withKI(0).withKD(0.2)
+        .withKP(0.15).withKI(0).withKD(0.01) //KP was 100 KD was 0.2
         .withKS(0).withKV(1.5).withKA(0);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
@@ -144,7 +144,7 @@ public class Constants {
             b_MIC = 15;
 }
 
-public static final class IntakeConstants{ // TODO: Go over motor constants
+public static final class IntakeConstants{
     public static final int
         intakeID = 10;
 
