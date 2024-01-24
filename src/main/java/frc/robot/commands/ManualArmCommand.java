@@ -4,15 +4,13 @@
 
 package frc.robot.commands;
 
-import java.util.function.DoubleSupplier;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subystems.arm;
 
 public class ManualArmCommand extends Command {
 arm armSub;
-DoubleSupplier speed;
-  public ManualArmCommand(DoubleSupplier armSpeed, arm arm) {
+double speed;
+  public ManualArmCommand(double armSpeed, arm arm) {
     this.armSub = arm;
     this.speed = armSpeed;
     addRequirements(arm);  
@@ -25,7 +23,7 @@ DoubleSupplier speed;
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    armSub.move(speed.getAsDouble());
+    armSub.move(speed);
   }
 
   // Called once the command ends or is interrupted.
