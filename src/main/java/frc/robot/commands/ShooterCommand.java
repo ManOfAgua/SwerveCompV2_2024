@@ -6,6 +6,7 @@ package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subystems.shooter;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 
 public class ShooterCommand extends Command {
   private final shooter shooterSub;
@@ -40,3 +41,4 @@ public class ShooterCommand extends Command {
     return false;
   }
 }
+
