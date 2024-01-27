@@ -9,7 +9,6 @@ import frc.robot.subystems.shooter;
 
 public class ShooterCommand extends Command {
   private final shooter shooterSub;
-  private boolean done;
   private final double speed;
 
   public ShooterCommand(double speed, shooter shooter) {

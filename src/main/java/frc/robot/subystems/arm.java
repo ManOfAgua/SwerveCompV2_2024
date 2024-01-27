@@ -56,7 +56,7 @@ public class arm extends SubsystemBase {
   }
   
   public void brakeMode(){
-        leftArm.setNeutralMode(NeutralModeValue.Brake);
+        leftArm.setNeutralMode(NeutralModeValue.Coast); //TODO: change back to brake when done with sensor values
   }
 
     //  public double calculateAngle(){

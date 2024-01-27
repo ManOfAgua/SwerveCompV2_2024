@@ -15,7 +15,6 @@ import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.ArmPIDCommand;
@@ -23,7 +22,6 @@ import frc.robot.commands.CascadeCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
-import frc.robot.disabled.Disable;
 import frc.robot.subystems.arm;
 import frc.robot.subystems.cascade;
 import frc.robot.subystems.intake;
@@ -36,27 +34,29 @@ public class RobotContainer {
 
 
   /* Setting up bindings for necessary control of the swerve drive platform */
- // My joystick
-  private final PS5Controller driver = new PS5Controller(0);
+                              /* Joysticks */
+
+ private final PS5Controller driver = new PS5Controller(0);
   private final PS5Controller operator = new PS5Controller(1);
   
   private final CommandSwerveDrivetrain drivetrain = Constants.DriveTrain; // My drivetrain
 
 
                               /* Driver Buttons */
-  private final JoystickButton resetHeadingButton = new JoystickButton(driver, ControllerConstants.b_L1);
+  private final JoystickButton resetHeadingButton = new JoystickButton(driver, ControllerConstants.b_O);
   private final JoystickButton brakeButton = new JoystickButton(driver, ControllerConstants.b_L2);
-  private final JoystickButton tri = new JoystickButton(driver, ControllerConstants.b_TRI); //Might be Robot Centric??
+  private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_X); //Might be Robot Centric??
   private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
-  private final JoystickButton shootButton = new JoystickButton(driver, ControllerConstants.b_X);
-  private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_MIC);
-//   private final JoystickButton cascadeButton = new JoystickButton(driver, 0);
+  private final JoystickButton cascadeUpButton = new JoystickButton(driver, ControllerConstants.b_PIC);
+  private final JoystickButton cascadeDwnButton = new JoystickButton(driver, ControllerConstants.b_MEN);
+
 
                               /*Operator Buttons */
   private final JoystickButton armFwdButton = new JoystickButton(operator, ControllerConstants.b_L2);
   private final JoystickButton armBckButton = new JoystickButton(operator, ControllerConstants.b_R2);
-  private final JoystickButton cascadeUpButton = new JoystickButton(operator, ControllerConstants.b_L1);
-  private final JoystickButton cascadeDwnButton = new JoystickButton(operator, ControllerConstants.b_R1);
+  private final JoystickButton shootButton = new JoystickButton(operator, ControllerConstants.b_X);
+  private final JoystickButton shootSlowButton = new JoystickButton(operator, ControllerConstants.b_SQR);
+
 
 //   private final JoystickButton sourceButton = new JoystickButton(operator, 0);
 //   private final JoystickButton ampButton = new JoystickButton(operator, 0);
@@ -75,20 +75,20 @@ public class RobotContainer {
   private final ManualArmCommand armBckCommand = new ManualArmCommand(-0.3, armSub);
   private final ShooterCommand shootCommand = new ShooterCommand(1, shooterSub); //may change speed
   private final IntakeCommand intakeCommand = new IntakeCommand(0.4, intakeSub);
-  private final CascadeCommand cascadeUpCommand = new CascadeCommand(0.10, cascadeSub);
-  private final CascadeCommand cascadeDwnCommand = new CascadeCommand(-0.10, cascadeSub);
+  private final CascadeCommand cascadeUpCommand = new CascadeCommand(0.70, cascadeSub);
+  private final CascadeCommand cascadeDwnCommand = new CascadeCommand(-0.70, cascadeSub);
+  private final ShooterCommand shootSlowCommand = new ShooterCommand(0.10, shooterSub);
 
   private final ArmPIDCommand armSourceCommand = new ArmPIDCommand(1, armSub);
 
+  SendableChooser<Command> chooser = new SendableChooser<>();
+
+  private Command auto1 = drivetrain.getAutoPath(null);
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                // driving in open loop
-
-  // private final SwerveRequest.RobotCentric RobotCentricDrive = new SwerveRequest.RobotCentric()
-  //     .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
-  //     .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
 
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -104,7 +104,7 @@ public class RobotContainer {
     
 
     brakeButton.whileTrue(drivetrain.applyRequest(() -> brake));
-    tri.whileTrue(drivetrain
+    robotCentricButton.whileTrue(drivetrain
         .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
     // reset the field-centric heading on left bumper press
@@ -126,32 +126,19 @@ public class RobotContainer {
         armBckButton.whileTrue(armBckCommand);
         cascadeUpButton.whileTrue(cascadeUpCommand);
         cascadeDwnButton.whileTrue(cascadeDwnCommand);
+        shootSlowButton.whileTrue(shootSlowCommand);
 
   }
 
   public RobotContainer() {
     configureBindings();
 
-
+    chooser.addOption("Auto 1", auto1);
+    SmartDashboard.putData(chooser);
   }
+
 
   public Command getAutonomousCommand() {
-            SendableChooser<String> val = (SendableChooser)SmartDashboard.getData("Auton Chooser");
-        switch (val.getSelected()) {
-            // case "Straight":
-            //     return new Straight(s_Swerve);
-            // case "Cones":
-            //     return new Cones(s_Swerve);
-            // case "ConesCurve":
-            //     return new ConesCurve(s_Swerve);
-            // case "ConesCurve2": //ConesCurve that actualy works
-            //     return new ConesCurve2(s_Swerve);
-        default:
-            return null;
-        }
+    return chooser.getSelected();
   }
-
-      public Command getDisableCommand() {
-            return new Disable(drivetrain);
-        }
 }
