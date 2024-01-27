@@ -177,9 +177,6 @@ public static final class CascadeConstants{
     public static final int 
         cascadeID = 9;
 }
-
-
-
     private static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
             kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide);
     private static final SwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
@@ -188,7 +185,6 @@ public static final class CascadeConstants{
             kBackLeftSteerMotorId, kBackLeftDriveMotorId, kBackLeftEncoderId, kBackLeftEncoderOffset, Units.inchesToMeters(kBackLeftXPosInches), Units.inchesToMeters(kBackLeftYPosInches), kInvertLeftSide);
     private static final SwerveModuleConstants BackRight = ConstantCreator.createModuleConstants(
             kBackRightSteerMotorId, kBackRightDriveMotorId, kBackRightEncoderId, kBackRightEncoderOffset, Units.inchesToMeters(kBackRightXPosInches), Units.inchesToMeters(kBackRightYPosInches), kInvertRightSide);
-
     public static final CommandSwerveDrivetrain DriveTrain = new CommandSwerveDrivetrain(DrivetrainConstants, FrontLeft,
             FrontRight, BackLeft, BackRight);
 }
