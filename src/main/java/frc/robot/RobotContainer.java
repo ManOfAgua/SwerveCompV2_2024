@@ -8,6 +8,7 @@ import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -31,11 +32,9 @@ import frc.robot.subystems.shooter;
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
   private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
-  // private boolean driveVal = false;
 
   //Path Planner
   private final SendableChooser<Command> autoChooser;
-
 
   /* Setting up bindings for necessary control of the swerve drive platform */
  // My joystick
@@ -68,6 +67,8 @@ public class RobotContainer {
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
 
+                              /* Auto ArmCommands */
+  private final ArmPIDCommand arm_RaiseToSpeaker = new ArmPIDCommand(37.18196077f, armSub);
 
                               /* Commands */
   private final ManualArmCommand armFwdCommand = new ManualArmCommand(0.15, armSub);
@@ -126,7 +127,8 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser();
-    //check 2
+    //Named commands 
+    NamedCommands.registerCommand("Raise To Speaker", arm_RaiseToSpeaker);
   }
 
   public Command getAutonomousCommand() {
