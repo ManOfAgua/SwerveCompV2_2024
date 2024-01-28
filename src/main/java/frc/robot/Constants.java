@@ -169,8 +169,10 @@ public static final class ArmConstants{
     public static double
     armSpeed = 0.5,
 
-    armKP = 0.01, armKI = 0.002, armKD = 0.0014,
-    angleKP = 0.1, angleKI = 0.1, angleKD = 0.0;
+    armKP = 0.005, armKI = 0.002, armKD = 0.002,
+    angleKP = 0.1, angleKI = 0.1, angleKD = 0.0,
+
+    kArmGearRatio = 36.6, kCountsPerRev = 2048, kArmScaleFactor = (360 / (243.316601563/ (kCountsPerRev * kArmGearRatio)));
 }
 
 public static final class CascadeConstants{

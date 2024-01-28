@@ -15,7 +15,9 @@ import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.CascadeCommand;
@@ -30,16 +32,18 @@ import frc.robot.subystems.shooter;
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
   private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
-  // private boolean driveVal = false;
+  // private boolean driveVal = false;  
 
 
   /* Setting up bindings for necessary control of the swerve drive platform */
+
                               /* Joysticks */
 
  private final PS5Controller driver = new PS5Controller(0);
   private final PS5Controller operator = new PS5Controller(1);
   
   private final CommandSwerveDrivetrain drivetrain = Constants.DriveTrain; // My drivetrain
+
 
 
                               /* Driver Buttons */
@@ -49,6 +53,7 @@ public class RobotContainer {
   private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
   private final JoystickButton cascadeUpButton = new JoystickButton(driver, ControllerConstants.b_PIC);
   private final JoystickButton cascadeDwnButton = new JoystickButton(driver, ControllerConstants.b_MEN);
+  private final JoystickButton armPIDButton = new JoystickButton(driver, ControllerConstants.b_SQR);
 
 
                               /*Operator Buttons */
@@ -79,11 +84,12 @@ public class RobotContainer {
   private final CascadeCommand cascadeDwnCommand = new CascadeCommand(-0.70, cascadeSub);
   private final ShooterCommand shootSlowCommand = new ShooterCommand(0.10, shooterSub);
 
-  private final ArmPIDCommand armSourceCommand = new ArmPIDCommand(1, armSub);
+  private final ArmPIDCommand armSourceCommand = new ArmPIDCommand(53.508, armSub);
 
   SendableChooser<Command> chooser = new SendableChooser<>();
 
-  private Command auto1 = drivetrain.getAutoPath(null);
+  private Command runAuto = drivetrain.getAutoPath("Auto1");
+
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
@@ -92,7 +98,7 @@ public class RobotContainer {
 
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  private final Telemetry logger = new Telemetry(MaxSpeed);
+  // private final Telemetry logger = new Telemetry(MaxSpeed);
 
   private void configureBindings() {
         drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
@@ -113,7 +119,7 @@ public class RobotContainer {
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
-    drivetrain.registerTelemetry(logger::telemeterize);
+    // drivetrain.registerTelemetry(logger::telemeterize);
                                         /*Driver Buttons*/
         
 
@@ -127,14 +133,19 @@ public class RobotContainer {
         cascadeUpButton.whileTrue(cascadeUpCommand);
         cascadeDwnButton.whileTrue(cascadeDwnCommand);
         shootSlowButton.whileTrue(shootSlowCommand);
+        armPIDButton.onTrue(armSourceCommand);
 
   }
 
   public RobotContainer() {
     configureBindings();
-
-    chooser.addOption("Auto 1", auto1);
+    chooser.addOption("Auto 1", runAuto);
     SmartDashboard.putData(chooser);
+    
+    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::zeroGyro));
+      RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::zeroGyro));
+
+
   }
 
 

@@ -39,7 +39,7 @@ private boolean done;
         done = armPID.atSetpoint();
     
     double speed = armPID.calculate(armSub.armTickToDegrees(), goal);
-    armSub.move(speed);
+    armSub.move(-speed);
 
     SmartDashboard.putBoolean("Arm Tolerance Check", armPID.atSetpoint());
     SmartDashboard.putNumber("Arm Tolerance", armPID.getPositionError());

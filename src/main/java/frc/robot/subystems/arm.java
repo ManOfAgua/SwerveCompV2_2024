@@ -14,6 +14,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
@@ -27,23 +28,11 @@ public class arm extends SubsystemBase {
     brakeMode();
   }
 
-  public double getSensorPositionRaw(){
-     return leftArm.getPosition().getValueAsDouble();
-  }
-
-  public double getSensorPos(){
-    return getSensorPositionRaw()/2048;
-  }
-
-  public double getSensorPos2(){
-    return getSensorPos()/174.55;
-  }
-
    public double armTickToDegrees() {
-    return 2;
-  //   double motorRotations = rightArm.getSelectedSensorPosition() / (2048 * 200);
-  //   double armTicksPerDegree = motorRotations * ArmConstants.kArmScaleFactor; // 359.489141
-  // return armTicksPerDegree;
+    double motorRotations = leftArm.getPosition().getValueAsDouble() / (ArmConstants.kCountsPerRev * ArmConstants.kArmGearRatio);
+    double armTicksPerDegree = motorRotations * ArmConstants.kArmScaleFactor;
+
+  return -armTicksPerDegree;
    }
 
   public void move(double speed){
@@ -56,7 +45,7 @@ public class arm extends SubsystemBase {
   }
   
   public void brakeMode(){
-        leftArm.setNeutralMode(NeutralModeValue.Coast); //TODO: change back to brake when done with sensor values
+        leftArm.setNeutralMode(NeutralModeValue.Brake);
   }
 
     //  public double calculateAngle(){
@@ -93,9 +82,15 @@ public class arm extends SubsystemBase {
 
   @Override
   public void periodic() {
-    SmartDashboard.putNumber("Sensor Position Raw", getSensorPositionRaw());
-    SmartDashboard.putNumber("Sensor Pos", getSensorPos());
-    SmartDashboard.putNumber("Sensor Position Raw2", getSensorPos2());
+
+
+ 
+    //Test 1: -121.3916015625
+    //Test 2: -122.13525390625
+    //Test 3: -122.5244140625
+    //Test 4: -119.46533203125
+    //Test 5: -122.77490234375
+    // Avg: -121.65830078125
                     
           //////////////////////////// PHOTON         /////////////////////
 
