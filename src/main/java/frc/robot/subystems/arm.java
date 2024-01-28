@@ -6,6 +6,7 @@ package frc.robot.subystems;
 
 import java.util.function.DoubleSupplier;
 
+// Photon stuff
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -97,7 +98,7 @@ public class arm extends SubsystemBase {
     SmartDashboard.putNumber("Sensor Pos", getSensorPos());
     SmartDashboard.putNumber("Sensor Position Raw2", getSensorPos2());
                     
-          //////////////////////////// PHOTON         /////////////////////
+          //////////////////////////// PHOTON    /////////////////////
 
     // SmartDashboard.putNumber("ID Detected", photonCamera.getLatestResult().getBestTarget().getFiducialId());
     // SmartDashboard.putNumber("Yaw April Tag", photonCamera.getLatestResult().getBestTarget().getYaw());
