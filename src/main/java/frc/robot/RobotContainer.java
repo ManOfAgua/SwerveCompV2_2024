@@ -141,10 +141,7 @@ public class RobotContainer {
     configureBindings();
     chooser.addOption("Auto 1", runAuto);
     SmartDashboard.putData(chooser);
-    
-    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::zeroGyro));
-      RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::zeroGyro));
-
+    drivetrain.zeroGyro();
 
   }
 
