@@ -21,8 +21,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 
@@ -50,7 +48,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
-        brakeMode();
+        // coastMode();
         configurePathPlanner();
 
         if (Utils.isSimulation()) {
@@ -59,7 +57,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
-        brakeMode();
+        // coastMode();
         configurePathPlanner();
         gyro = new Pigeon2(17);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
@@ -70,7 +68,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
     }
     private void configurePathPlanner() {
-        double driveBaseRadius = 0;
+        double driveBaseRadius = 14;
         gyro = new Pigeon2(17);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
@@ -132,17 +130,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         gyro.setYaw(0);
     }
     
-    public void brakeMode(){
-        if(DriverStation.isDisabled()){
-        flDrive.setNeutralMode(NeutralModeValue.Coast);
-        frDrive.setNeutralMode(NeutralModeValue.Coast);
-        blDrive.setNeutralMode(NeutralModeValue.Coast);
-        brDrive.setNeutralMode(NeutralModeValue.Coast);
-        flSteer.setNeutralMode(NeutralModeValue.Coast);
-        frSteer.setNeutralMode(NeutralModeValue.Coast);
-        blSteer.setNeutralMode(NeutralModeValue.Coast);
-        brSteer.setNeutralMode(NeutralModeValue.Coast);
-        }
-    }
+    // public void coastMode(){
+    //     if(DriverStation.isDisabled()){
+    //     flDrive.setNeutralMode(NeutralModeValue.Coast);
+    //     frDrive.setNeutralMode(NeutralModeValue.Coast);
+    //     blDrive.setNeutralMode(NeutralModeValue.Coast);
+    //     brDrive.setNeutralMode(NeutralModeValue.Coast);
+    //     flSteer.setNeutralMode(NeutralModeValue.Coast);
+    //     frSteer.setNeutralMode(NeutralModeValue.Coast);
+    //     blSteer.setNeutralMode(NeutralModeValue.Coast);
+    //     brSteer.setNeutralMode(NeutralModeValue.Coast);
+    //     }
+    // }
 
 }
