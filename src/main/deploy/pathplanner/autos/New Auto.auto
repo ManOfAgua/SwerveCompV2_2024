@@ -14,7 +14,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": null
+            "pathName": "PathRight"
+          }
+        },
+        {
+          "type": "sequential",
+          "data": {
+            "commands": []
           }
         }
       ]

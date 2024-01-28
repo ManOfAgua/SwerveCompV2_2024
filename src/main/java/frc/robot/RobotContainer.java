@@ -26,6 +26,15 @@ import frc.robot.subystems.arm;
 import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
+//Path Planner imports
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+
+
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
   private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
@@ -38,6 +47,7 @@ public class RobotContainer {
   private final PS5Controller operator = new PS5Controller(1);
   
   private final CommandSwerveDrivetrain drivetrain = Constants.DriveTrain; // My drivetrain
+  private final SendableChooser<Command> autoChooser;
 
 
                               /* Driver Buttons */
@@ -120,24 +130,12 @@ public class RobotContainer {
 
   public RobotContainer() {
     configureBindings();
-
+    autoChooser = AutoBuilder.buildAutoChooser();
 
   }
 
   public Command getAutonomousCommand() {
-            SendableChooser<String> val = (SendableChooser)SmartDashboard.getData("Auton Chooser");
-        switch (val.getSelected()) {
-            // case "Straight":
-            //     return new Straight(s_Swerve);
-            // case "Cones":
-            //     return new Cones(s_Swerve);
-            // case "ConesCurve":
-            //     return new ConesCurve(s_Swerve);
-            // case "ConesCurve2": //ConesCurve that actualy works
-            //     return new ConesCurve2(s_Swerve);
-        default:
-            return null;
-        }
+          return autoChooser.getSelected();
   }
 
       public Command getDisableCommand() {
