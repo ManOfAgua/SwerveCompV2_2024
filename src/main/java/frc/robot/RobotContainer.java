@@ -133,8 +133,9 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-          PathPlannerPath path = PathPlannerPath.fromPathFile("New Path");
-          return AutoBuilder.followPath(path);
+    return null;
+    //try auto path
+    //see doc for it
   }
 
       public Command getDisableCommand() {
