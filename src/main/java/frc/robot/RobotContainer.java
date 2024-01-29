@@ -68,6 +68,8 @@ public class RobotContainer {
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
 
+  
+
                               /* Auto ArmCommands */
   private final ArmPIDCommand arm_RaiseToSpeaker = new ArmPIDCommand(37.18196077f, armSub);
 
@@ -128,8 +130,11 @@ public class RobotContainer {
   public RobotContainer() {
     configureBindings();
     autoChooser = AutoBuilder.buildAutoChooser();
+    arm armSub_ = new arm();
+    shooter shooter_ = new shooter();
+    
     //Named commands 
-    NamedCommands.registerCommand("Raise To Speaker", arm_RaiseToSpeaker);
+    NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(37.1819, armSub_));
   }
 
   public Command getAutonomousCommand() {
