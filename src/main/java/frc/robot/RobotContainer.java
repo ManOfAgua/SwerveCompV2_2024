@@ -9,6 +9,7 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
@@ -132,15 +133,13 @@ public class RobotContainer {
     autoChooser = AutoBuilder.buildAutoChooser();
     arm armSub_ = new arm();
     shooter shooter_ = new shooter();
-    
+
     //Named commands 
-    NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(37.1819, armSub_));
+    NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(2, armSub_));
   }
 
   public Command getAutonomousCommand() {
-    return null;
-    //try auto path
-    //see doc for it
+    return new PathPlannerAuto("New Auto");
   }
 
       public Command getDisableCommand() {
