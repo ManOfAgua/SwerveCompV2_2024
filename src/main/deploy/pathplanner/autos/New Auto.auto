@@ -12,15 +12,9 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "PathRight"
-          }
-        },
-        {
-          "type": "sequential",
-          "data": {
-            "commands": []
+            "name": null
           }
         }
       ]
