@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,13 +22,13 @@ private boolean done;
     this.armSub = arm;
     this.goal = setPoint;
     this.armPID = new PIDController(ArmConstants.armKP, ArmConstants.armKI, ArmConstants.armKD);
-    armPID.setSetpoint(setPoint);
     
     addRequirements(armSub);
   }
 
   @Override
   public void initialize() {
+    armPID.setSetpoint(goal);
     armPID.reset();
     System.out.println("\n\nArm PID Command Has Started\n\n");
     armPID.setTolerance(0.25);

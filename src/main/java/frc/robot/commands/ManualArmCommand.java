@@ -4,12 +4,14 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subystems.arm;
 
 public class ManualArmCommand extends Command {
-arm armSub;
-double speed;
+private arm armSub;
+private double speed;
   public ManualArmCommand(double armSpeed, arm arm) {
     this.armSub = arm;
     this.speed = armSpeed;

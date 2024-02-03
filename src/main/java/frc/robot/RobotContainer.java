@@ -17,30 +17,30 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
+import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.ArmPIDCommand;
-import frc.robot.commands.CascadeCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subystems.arm;
-import frc.robot.subystems.cascade;
 import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
 public class RobotContainer {
   private double MaxSpeed = 6; // 6 meters per second desired top speed
-  private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
-  // private boolean driveVal = false;  
+  private double MaxAngularRate = 2.5 * Math.PI; // 1 rotation per second max angular velocity
 
 
   /* Setting up bindings for necessary control of the swerve drive platform */
 
                               /* Joysticks */
-
- private final PS5Controller driver = new PS5Controller(0);
-  private final PS5Controller operator = new PS5Controller(1);
+ private final PS5Controller driver = new PS5Controller(ControllerConstants.driver);
+  private final PS5Controller operator = new PS5Controller(ControllerConstants.operator);
   
   private final CommandSwerveDrivetrain drivetrain = Constants.DriveTrain; // My drivetrain
 
@@ -49,46 +49,35 @@ public class RobotContainer {
                               /* Driver Buttons */
   private final JoystickButton resetHeadingButton = new JoystickButton(driver, ControllerConstants.b_O);
   private final JoystickButton brakeButton = new JoystickButton(driver, ControllerConstants.b_L2);
-  private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_X); //Might be Robot Centric??
-  private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
-  private final JoystickButton cascadeUpButton = new JoystickButton(driver, ControllerConstants.b_PIC);
-  private final JoystickButton cascadeDwnButton = new JoystickButton(driver, ControllerConstants.b_MEN);
-  private final JoystickButton armPIDButton = new JoystickButton(driver, ControllerConstants.b_SQR);
+  private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_X);//Might be Robot Centric??
+
+  private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R2);
+  private final JoystickButton revintakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
 
 
                               /*Operator Buttons */
   private final JoystickButton armFwdButton = new JoystickButton(operator, ControllerConstants.b_L2);
   private final JoystickButton armBckButton = new JoystickButton(operator, ControllerConstants.b_R2);
-  private final JoystickButton shootButton = new JoystickButton(operator, ControllerConstants.b_X);
+  private final POVButton armAmpButton = new POVButton(operator, 180);
+  private final POVButton armSourceButton = new POVButton(operator, 0);
+  private final JoystickButton armspeakerFarButton = new JoystickButton(operator, ControllerConstants.b_TRI);
+  private final JoystickButton armspeakerCloseButton = new JoystickButton(operator, ControllerConstants.b_X);
+  // private final POVButton photonCommandButton = new POVButton(operator, 90); //TODO: Choose Button
+
+  private final JoystickButton shootButton = new JoystickButton(operator, ControllerConstants.b_O);
   private final JoystickButton shootSlowButton = new JoystickButton(operator, ControllerConstants.b_SQR);
-
-
-//   private final JoystickButton sourceButton = new JoystickButton(operator, 0);
-//   private final JoystickButton ampButton = new JoystickButton(operator, 0);
-
 
 
                               /* Subsystems */
   private final arm armSub = new arm();
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
-  private final cascade cascadeSub = new cascade();
 
-
-                              /* Commands */
-  private final ManualArmCommand armFwdCommand = new ManualArmCommand(0.3, armSub);
-  private final ManualArmCommand armBckCommand = new ManualArmCommand(-0.3, armSub);
-  private final ShooterCommand shootCommand = new ShooterCommand(1, shooterSub); //may change speed
-  private final IntakeCommand intakeCommand = new IntakeCommand(0.4, intakeSub);
-  private final CascadeCommand cascadeUpCommand = new CascadeCommand(0.70, cascadeSub);
-  private final CascadeCommand cascadeDwnCommand = new CascadeCommand(-0.70, cascadeSub);
-  private final ShooterCommand shootSlowCommand = new ShooterCommand(0.10, shooterSub);
-
-  private final ArmPIDCommand armSourceCommand = new ArmPIDCommand(53.508, armSub);
-
+  
   SendableChooser<Command> chooser = new SendableChooser<>();
 
   private Command runAuto = drivetrain.getAutoPath("Auto1");
+  private Command saahil = drivetrain.getAutoPath("New Auto");
 
 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -120,28 +109,37 @@ public class RobotContainer {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     // drivetrain.registerTelemetry(logger::telemeterize);
-                                        /*Driver Buttons*/
-        
 
 
+                                        /*Driver Commands*/
+        intakeButton.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
+        revintakeButton.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
+        revintakeButton.whileTrue(new ShooterCommand(-0.2, shooterSub));
 
-                                        /*Operator Buttons*/
-        shootButton.whileTrue(shootCommand);
-        intakeButton.whileTrue(intakeCommand);
-        armFwdButton.whileTrue(armFwdCommand);
-        armBckButton.whileTrue(armBckCommand);
-        cascadeUpButton.whileTrue(cascadeUpCommand);
-        cascadeDwnButton.whileTrue(cascadeDwnCommand);
-        shootSlowButton.whileTrue(shootSlowCommand);
-        armPIDButton.onTrue(armSourceCommand);
+                                        /*Operator Commands*/
+        shootButton.whileTrue(new ShooterCommand(ShooterConstants.shooterSpd, shooterSub));
+        shootSlowButton.whileTrue(new ShooterCommand(ShooterConstants.shooterSlwSpd, shooterSub));
+
+        armFwdButton.whileTrue(new ManualArmCommand(ArmConstants.armSpd, armSub));
+        armBckButton.whileTrue(new ManualArmCommand(-ArmConstants.armSpd, armSub));
+
+        armSourceButton.onTrue(new ArmPIDCommand(81.5, armSub));
+        armspeakerFarButton.onTrue(new ArmPIDCommand(37.18190611, armSub));
+        armspeakerCloseButton.onTrue(new ArmPIDCommand(29, armSub));
+        armAmpButton.onTrue(new ArmPIDCommand(112.3, armSub));
+
+        // photonCommandButton.onTrue(new PhotonCommand(armSub::calculateAngle, armSub));
+
+
 
   }
-
   public RobotContainer() {
     configureBindings();
     chooser.addOption("Auto 1", runAuto);
+    chooser.addOption("New Auto", saahil);
     SmartDashboard.putData(chooser);
     drivetrain.zeroGyro();
+    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
 
   }
 

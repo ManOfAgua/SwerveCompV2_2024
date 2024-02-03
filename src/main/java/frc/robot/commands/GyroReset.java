@@ -4,19 +4,21 @@
 
 package frc.robot.commands;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subystems.cascade;
+import com.ctre.phoenix6.hardware.Pigeon2;
 
-public class CascadeCommand extends Command {
-cascade cascadeSub;
-double speed;
-  public CascadeCommand(double intakeSpeed, cascade cascade){
-    this.cascadeSub = cascade;
-    this.speed = intakeSpeed;
-    addRequirements(cascade);  
+import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.IDConstants;
+
+public class GyroReset extends Command {
+  /** Creates a new GyroReset. */
+  Pigeon2 gyro = new Pigeon2(IDConstants.gyro);
+  public GyroReset() {
+    gyro.setYaw(0);
+      
   }
 
-@Override
+  // Called when the command is initially scheduled.
+  @Override
   public void initialize() {
     
   }
@@ -24,14 +26,12 @@ double speed;
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    cascadeSub.move(speed);
-      }
+    gyro.setYaw(0);
+  }
 
   // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {
-    cascadeSub.move(0);
-  }
+  public void end(boolean interrupted) {}
 
   // Returns true when the command should end.
   @Override
