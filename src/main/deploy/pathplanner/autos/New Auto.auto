@@ -12,15 +12,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "New Path"
+            "name": "resetGyro"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Raise To Speaker"
+            "pathName": "New Path"
           }
         }
       ]
