@@ -9,13 +9,13 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants.SteerFeedbackTy
 
 import edu.wpi.first.math.util.Units;
 
-public class Constants {
+public class Constants { //TODO: Tune it
     // Both sets of gains need to be tuned to your individual robot.
 
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(100).withKI(0).withKD(0.2)
+        .withKP(105).withKI(0).withKD(0.2) 
         .withKS(0).withKV(1.5).withKA(0);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
@@ -61,7 +61,7 @@ public class Constants {
     private static final double kSteerFrictionVoltage = 0.25;
     private static final double kDriveFrictionVoltage = 0.25;
 
-    public static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
+    private static final SwerveDrivetrainConstants DrivetrainConstants = new SwerveDrivetrainConstants()
             .withPigeon2Id(kPigeonId)
             .withCANbusName(kCANbusName);
 
@@ -122,11 +122,15 @@ public class Constants {
     
     
     /*----------------------------------------Constants----------------------------------------*/
+
+    public static final class IDConstants{
+        public static final int
+            gyro = 17;
+    }
     public static final class ControllerConstants { //for playstation 5 controller
         public static final int
             driver = 0, 
             operator = 1,
-        //buttons (b_)
             b_SQR = 1,
             b_X = 2,
             b_O = 3,
@@ -144,12 +148,12 @@ public class Constants {
             b_MIC = 15;
 }
 
-public static final class IntakeConstants{ // TODO: Go over motor constants
+public static final class IntakeConstants{
     public static final int
         intakeID = 10;
 
     public static double 
-        intakeMotorSpd = 1;
+        intakeSpd = 0.4;
         }
 
 public static final class ShooterConstants{
@@ -158,25 +162,23 @@ public static final class ShooterConstants{
         shooterBtmID = 11;
 
     public static double 
-        shooterSpeed =1,
+        shooterSpd = 0.65,
+        shooterSlwSpd = 0.10,
     shooterKP = 0.1, shooterKI = 0.0, shooterKD = 0.0;
 }
 
 public static final class ArmConstants{
     public static final int 
-        armID = 8;
+        leftarmID = 8, rightarmID = 9;
 
     public static double
-    armSpeed = 0.5,
+    armSpd = 0.2,
+    armKP = 0.01, armKI = 0.002, armKD = 0.002,
 
-    armKP = 0.1, armKI = 0.1, armKD = 0.0,
-    angleKP = 0.1, angleKI = 0.1, angleKD = 0.0;
+    kArmGearRatio = 36.66, kCountsPerRev = 2048, kArmScaleFactor = (360 / (243.316601563/ (kCountsPerRev * kArmGearRatio)));
 }
 
-public static final class CascadeConstants{
-    public static final int 
-        cascadeID = 9;
-}
+
     private static final SwerveModuleConstants FrontLeft = ConstantCreator.createModuleConstants(
             kFrontLeftSteerMotorId, kFrontLeftDriveMotorId, kFrontLeftEncoderId, kFrontLeftEncoderOffset, Units.inchesToMeters(kFrontLeftXPosInches), Units.inchesToMeters(kFrontLeftYPosInches), kInvertLeftSide);
     private static final SwerveModuleConstants FrontRight = ConstantCreator.createModuleConstants(
@@ -185,6 +187,7 @@ public static final class CascadeConstants{
             kBackLeftSteerMotorId, kBackLeftDriveMotorId, kBackLeftEncoderId, kBackLeftEncoderOffset, Units.inchesToMeters(kBackLeftXPosInches), Units.inchesToMeters(kBackLeftYPosInches), kInvertLeftSide);
     private static final SwerveModuleConstants BackRight = ConstantCreator.createModuleConstants(
             kBackRightSteerMotorId, kBackRightDriveMotorId, kBackRightEncoderId, kBackRightEncoderOffset, Units.inchesToMeters(kBackRightXPosInches), Units.inchesToMeters(kBackRightYPosInches), kInvertRightSide);
+
     public static final CommandSwerveDrivetrain DriveTrain = new CommandSwerveDrivetrain(DrivetrainConstants, FrontLeft,
             FrontRight, BackLeft, BackRight);
 }

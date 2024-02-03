@@ -4,6 +4,7 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -21,13 +22,13 @@ private boolean done;
     this.armSub = arm;
     this.goal = setPoint;
     this.armPID = new PIDController(ArmConstants.armKP, ArmConstants.armKI, ArmConstants.armKD);
-    armPID.setSetpoint(setPoint);
     
     addRequirements(armSub);
   }
 
   @Override
   public void initialize() {
+    armPID.setSetpoint(goal);
     armPID.reset();
     System.out.println("\n\nArm PID Command Has Started\n\n");
     armPID.setTolerance(0.25);
@@ -39,7 +40,7 @@ private boolean done;
         done = armPID.atSetpoint();
     
     double speed = armPID.calculate(armSub.armTickToDegrees(), goal);
-    armSub.move(speed);
+    armSub.move(-speed);
 
     SmartDashboard.putBoolean("Arm Tolerance Check", armPID.atSetpoint());
     SmartDashboard.putNumber("Arm Tolerance", armPID.getPositionError());
@@ -48,6 +49,7 @@ private boolean done;
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
+    System.out.println("\n\n\n\n Arm Command Has Finish \n\n\n\n\n");
     armSub.move(0);
   }
 
