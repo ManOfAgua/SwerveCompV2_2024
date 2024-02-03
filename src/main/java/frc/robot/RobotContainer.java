@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.io.Console;
+
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
@@ -143,6 +145,10 @@ public class RobotContainer {
     NamedCommands.registerCommand("Shoot", new ShooterCommand(1, shooter_));
     //potential gyro fix
     NamedCommands.registerCommand("resetGyro", new GyroReset());
+
+    NamedCommands.hasCommand("resetGyro");
+    NamedCommands.hasCommand("Raise To Speaker");
+
   }
 
   public Command getAutonomousCommand() {
