@@ -5,6 +5,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.fasterxml.jackson.databind.util.Named;
@@ -16,6 +17,7 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.kinematics.Odometry;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -24,6 +26,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.ArmPIDCommand;
+import frc.robot.commands.GyroReset;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
@@ -138,13 +141,15 @@ public class RobotContainer {
     //Named commands 
     NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(37.18196077f, armSub_));
     NamedCommands.registerCommand("Shoot", new ShooterCommand(1, shooter_));
+    //potential gyro fix
+    NamedCommands.registerCommand("resetGyro", new GyroReset());
   }
 
   public Command getAutonomousCommand() {
     return new PathPlannerAuto("New Auto");
   }
 
-      public Command getDisableCommand() {
-            return new Disable(drivetrain);
-        }
+  public Command getDisableCommand() {
+   return new Disable(drivetrain);
+  }
 }

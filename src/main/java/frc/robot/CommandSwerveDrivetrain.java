@@ -103,6 +103,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
     }
+  
+    
 
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
@@ -128,7 +130,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return gyro.getPitch().getValue();
     }
 
-    public void zeroGyro(){
+    public void zeroGyro() {
         gyro.setYaw(0);
     }
     
