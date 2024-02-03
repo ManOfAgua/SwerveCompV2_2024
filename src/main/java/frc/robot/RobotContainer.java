@@ -7,6 +7,7 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
@@ -135,7 +136,8 @@ public class RobotContainer {
     shooter shooter_ = new shooter();
 
     //Named commands 
-    NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(2, armSub_));
+    NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(37.18196077f, armSub_));
+    NamedCommands.registerCommand("Shoot", new ShooterCommand(1, shooter_));
   }
 
   public Command getAutonomousCommand() {
