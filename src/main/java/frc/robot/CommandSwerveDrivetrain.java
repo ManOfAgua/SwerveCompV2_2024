@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
+import frc.robot.Constants.IDConstants;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements subsystem
@@ -59,7 +60,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         super(driveTrainConstants, modules);
         // coastMode();
         configurePathPlanner();
-        gyro = new Pigeon2(17);
+        gyro = new Pigeon2(IDConstants.gyro);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
 
@@ -69,7 +70,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
     private void configurePathPlanner() {
         double driveBaseRadius = 14;
-        gyro = new Pigeon2(17);
+        gyro = new Pigeon2(IDConstants.gyro);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
         for (var moduleLocation : m_moduleLocations) {

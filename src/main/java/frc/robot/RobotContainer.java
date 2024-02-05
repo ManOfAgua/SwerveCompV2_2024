@@ -11,19 +11,17 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
@@ -96,20 +94,17 @@ public class RobotContainer {
             .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
-    
-
     brakeButton.whileTrue(drivetrain.applyRequest(() -> brake));
+
     robotCentricButton.whileTrue(drivetrain
         .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
-    // reset the field-centric heading on left bumper press
     resetHeadingButton.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
 
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
     // drivetrain.registerTelemetry(logger::telemeterize);
-
 
                                         /*Driver Commands*/
         intakeButton.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
@@ -123,10 +118,11 @@ public class RobotContainer {
         armFwdButton.whileTrue(new ManualArmCommand(ArmConstants.armSpd, armSub));
         armBckButton.whileTrue(new ManualArmCommand(-ArmConstants.armSpd, armSub));
 
-        armSourceButton.onTrue(new ArmPIDCommand(81.5, armSub));
-        armspeakerFarButton.onTrue(new ArmPIDCommand(37.18190611, armSub));
-        armspeakerCloseButton.onTrue(new ArmPIDCommand(29, armSub));
-        armAmpButton.onTrue(new ArmPIDCommand(112.3, armSub));
+                  //Speed formula rad × 180/π = degrees per arcsecond
+        armSourceButton.onTrue(armSub.armCommand(81.5, 0.05)); 
+        armspeakerFarButton.onTrue(armSub.armCommand(37.18190611, 0.05)); 
+        armspeakerCloseButton.onTrue(armSub.armCommand(29, 0.05)); 
+        armAmpButton.onTrue(armSub.armCommand(112.3, 0.05));
 
         // photonCommandButton.onTrue(new PhotonCommand(armSub::calculateAngle, armSub));
 
@@ -139,12 +135,13 @@ public class RobotContainer {
     chooser.addOption("New Auto", saahil);
     SmartDashboard.putData(chooser);
     drivetrain.zeroGyro();
-    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
+    // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
 
   }
 
 
   public Command getAutonomousCommand() {
+
     return chooser.getSelected();
   }
 }

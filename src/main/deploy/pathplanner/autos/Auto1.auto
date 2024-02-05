@@ -6,6 +6,12 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "resetGyro"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Path1"
