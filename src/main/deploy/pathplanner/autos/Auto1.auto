@@ -1,20 +1,20 @@
 {
   "version": 1.0,
-  "startingPose": null,
+  "startingPose": {
+    "position": {
+      "x": 2.0,
+      "y": 6.0
+    },
+    "rotation": 0
+  },
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "resetGyro"
-          }
-        },
-        {
           "type": "path",
           "data": {
-            "pathName": "Path1"
+            "pathName": "AutoPath1"
           }
         }
       ]

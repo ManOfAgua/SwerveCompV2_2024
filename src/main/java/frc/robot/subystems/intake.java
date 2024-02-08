@@ -8,6 +8,7 @@ package frc.robot.subystems;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
 
@@ -20,6 +21,13 @@ public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
 
   public void move(double speed){
   intake.set(speed);
+  }
+
+  public Command intakeAuto(double speed){
+    return run(
+      () -> 
+      intake.set(speed)
+    );
   }
   
 public void brakeMode(){

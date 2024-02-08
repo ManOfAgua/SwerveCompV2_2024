@@ -7,21 +7,25 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
@@ -60,7 +64,7 @@ public class RobotContainer {
   private final POVButton armSourceButton = new POVButton(operator, 0);
   private final JoystickButton armspeakerFarButton = new JoystickButton(operator, ControllerConstants.b_TRI);
   private final JoystickButton armspeakerCloseButton = new JoystickButton(operator, ControllerConstants.b_X);
-  // private final POVButton photonCommandButton = new POVButton(operator, 90); //TODO: Choose Button
+  private final POVButton photonCommandButton = new POVButton(operator, 90); //TODO: Choose Button
 
   private final JoystickButton shootButton = new JoystickButton(operator, ControllerConstants.b_O);
   private final JoystickButton shootSlowButton = new JoystickButton(operator, ControllerConstants.b_SQR);
@@ -71,13 +75,13 @@ public class RobotContainer {
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
 
+  private final ArmPIDCommand autoArm = new ArmPIDCommand(10, armSub);
   
   SendableChooser<Command> chooser = new SendableChooser<>();
 
-  private Command runAuto = drivetrain.getAutoPath("Auto1");
-  private Command saahil = drivetrain.getAutoPath("New Auto");
+  private Command runAuto1 = drivetrain.getAutoPath("Auto1");
 
-
+ 
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
@@ -104,7 +108,6 @@ public class RobotContainer {
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
-    // drivetrain.registerTelemetry(logger::telemeterize);
 
                                         /*Driver Commands*/
         intakeButton.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
@@ -118,30 +121,31 @@ public class RobotContainer {
         armFwdButton.whileTrue(new ManualArmCommand(ArmConstants.armSpd, armSub));
         armBckButton.whileTrue(new ManualArmCommand(-ArmConstants.armSpd, armSub));
 
-                  //Speed formula rad × 180/π = degrees per arcsecond
-        armSourceButton.onTrue(armSub.armCommand(81.5, 0.05)); 
-        armspeakerFarButton.onTrue(armSub.armCommand(37.18190611, 0.05)); 
-        armspeakerCloseButton.onTrue(armSub.armCommand(29, 0.05)); 
-        armAmpButton.onTrue(armSub.armCommand(112.3, 0.05));
+        armSourceButton.onTrue(new ArmPIDCommand(81.5, armSub));
+        armspeakerFarButton.onTrue(new ArmPIDCommand(10, armSub)); //negative is forward
+        armspeakerCloseButton.onTrue(new ArmPIDCommand(-10, armSub));
+        armAmpButton.onTrue(new ArmPIDCommand(112.3, armSub));
 
-        // photonCommandButton.onTrue(new PhotonCommand(armSub::calculateAngle, armSub));
+        // photonCommandButton.onTrue(armSub.photonCommand(0.05));
 
 
 
   }
+
   public RobotContainer() {
+    NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.5));
+    NamedCommands.registerCommand("Raise Arm", autoArm);
+    NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5));
+    NamedCommands.registerCommand("IntakeStop", intakeSub.intakeAuto(0));
+
     configureBindings();
-    chooser.addOption("Auto 1", runAuto);
-    chooser.addOption("New Auto", saahil);
+    chooser.addOption("Auto 1", runAuto1);
     SmartDashboard.putData(chooser);
     drivetrain.zeroGyro();
-    // RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
-
+    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::zeroGyro));
   }
 
-
   public Command getAutonomousCommand() {
-
     return chooser.getSelected();
   }
 }
