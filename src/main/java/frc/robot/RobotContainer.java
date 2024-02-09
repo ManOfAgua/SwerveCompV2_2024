@@ -7,7 +7,9 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -28,6 +30,7 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
+import frc.robot.commands.PhotonCommand;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subystems.arm;
 import frc.robot.subystems.intake;
@@ -39,6 +42,8 @@ public class RobotContainer {
 
 
   /* Setting up bindings for necessary control of the swerve drive platform */
+
+  
 
                               /* Joysticks */
  private final PS5Controller driver = new PS5Controller(ControllerConstants.driver);
@@ -74,12 +79,11 @@ public class RobotContainer {
   private final arm armSub = new arm();
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
-
+  
+                              /* Commands */
   private final ArmPIDCommand autoArm = new ArmPIDCommand(10, armSub);
   
   SendableChooser<Command> chooser = new SendableChooser<>();
-
-  private Command runAuto1 = drivetrain.getAutoPath("Auto1");
 
  
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -126,7 +130,7 @@ public class RobotContainer {
         armspeakerCloseButton.onTrue(new ArmPIDCommand(-10, armSub));
         armAmpButton.onTrue(new ArmPIDCommand(112.3, armSub));
 
-        // photonCommandButton.onTrue(armSub.photonCommand(0.05));
+        photonCommandButton.onTrue(new PhotonCommand(armSub));
 
 
 
@@ -137,9 +141,9 @@ public class RobotContainer {
     NamedCommands.registerCommand("Raise Arm", autoArm);
     NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5));
     NamedCommands.registerCommand("IntakeStop", intakeSub.intakeAuto(0));
-
     configureBindings();
-    chooser.addOption("Auto 1", runAuto1);
+
+    chooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData(chooser);
     drivetrain.zeroGyro();
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::zeroGyro));

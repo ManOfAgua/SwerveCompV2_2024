@@ -5,35 +5,25 @@ import java.util.function.Supplier;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
-import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.BaseUnits;
-import edu.wpi.first.units.Distance;
-import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
-import edu.wpi.first.units.Voltage;
+
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.IDConstants;
-import static edu.wpi.first.units.MutableMeasure.mutable;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+
 
 
 
@@ -47,15 +37,20 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private double m_lastSimTime;
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
         public Pigeon2 gyro;
+    private final Field2d m_Field2d = new Field2d();
 
-    TalonFX flSteer = new TalonFX(2);
-    TalonFX flDrive = new TalonFX(3);
-    TalonFX frSteer = new TalonFX(5);
-    TalonFX frDrive = new TalonFX(4);
-    TalonFX blSteer = new TalonFX(0);
-    TalonFX blDrive = new TalonFX(1);
-    TalonFX brSteer = new TalonFX(7);
-    TalonFX brDrive = new TalonFX(6);
+    
+    
+
+
+    // TalonFX flSteer = new TalonFX(2);
+    // TalonFX flDrive = new TalonFX(3);
+    // TalonFX frSteer = new TalonFX(5);
+    // TalonFX frDrive = new TalonFX(4);
+    // TalonFX blSteer = new TalonFX(0);
+    // TalonFX blDrive = new TalonFX(1);
+    // TalonFX brSteer = new TalonFX(7);
+    // TalonFX brDrive = new TalonFX(6);
 
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
@@ -71,9 +66,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         super(driveTrainConstants, modules);
         // coastMode();
         configurePathPlanner();
-        gyro = new Pigeon2(IDConstants.gyro);
-        gyro.getConfigurator().apply(new Pigeon2Configuration());
-        zeroGyro();
+        // gyro = new Pigeon2(IDConstants.gyro);
+        // gyro.getConfigurator().apply(new Pigeon2Configuration());
+        // zeroGyro();
 
         if (Utils.isSimulation()) {
             startSimThread();
@@ -105,9 +100,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return run(() -> this.setControl(requestSupplier.get()));
     }
 
-    public Command getAutoPath(String pathName) {
-        return new PathPlannerAuto(pathName);
-    }
+    // public Command getAutoPath(String pathName) {
+    //     return new PathPlannerAuto(pathName);
+    // }
 
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
@@ -130,7 +125,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     public double gyroHeading(){
-        return gyro.getYaw().getValue();
+        return gyro.getYaw().getValueAsDouble();
     }
 
     public double gyroPitch(){
@@ -139,24 +134,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public void zeroGyro(){
         gyro.setYaw(0);
-        System.out.println("Auto Gyro Zero");
-    }
-
-    public double leftgetDistance(){
-        double motorRotations = flDrive.getPosition().getValueAsDouble();
-        double wheelRotations = motorRotations / 6.75;
-
-        double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(2));
-
-        return -positionMeters;
-    }
-        public double rightgetDistance(){
-        double motorRotations = frDrive.getPosition().getValueAsDouble();
-        double wheelRotations = motorRotations / 6.75;
-
-        double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(2)); //wheel radius
-
-        return -positionMeters;
+        System.out.println("Gyro Zero");
     }
     
   // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
@@ -222,5 +200,11 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     //     brSteer.setNeutralMode(NeutralModeValue.Coast);
     //     }
     // }
+
+
+@Override
+public void periodic(){
+    SmartDashboard.putNumber("Heading", gyroHeading());
+}
 
 }

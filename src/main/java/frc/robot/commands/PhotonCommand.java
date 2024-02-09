@@ -10,16 +10,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.subystems.arm;
 
-public class ArmPIDCommand extends Command {
+public class PhotonCommand extends Command {
 
 private final arm armSub;
 private final PIDController armPID;
-private final double goal;
 private boolean done;
 
-  public ArmPIDCommand(double setPoint, arm arm) {
+  public PhotonCommand(arm arm) {
     this.armSub = arm;
-    this.goal = setPoint;
     this.armPID = new PIDController(ArmConstants.armKP, ArmConstants.armKI, ArmConstants.armKD);
     
     addRequirements(armSub);
@@ -27,7 +25,7 @@ private boolean done;
 
   @Override
   public void initialize() {
-    armPID.setSetpoint(goal);
+    armPID.setSetpoint(armSub.calculateAngle());
     armPID.reset();
     System.out.println("\n\nArm PID Command Has Started\n\n");
     armPID.setTolerance(0.25);
@@ -38,7 +36,7 @@ private boolean done;
   public void execute() {
         done = armPID.atSetpoint();
     
-    double speed = armPID.calculate(armSub.armTickToDegrees(), goal);
+    double speed = armPID.calculate(armSub.armTickToDegrees(), armSub.calculateAngle());
     armSub.move(-speed);
 
     SmartDashboard.putBoolean("Arm Tolerance Check", armPID.atSetpoint());
