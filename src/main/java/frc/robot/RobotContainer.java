@@ -135,7 +135,7 @@ public class RobotContainer {
   }
 
   public RobotContainer() {
-    configureBindings();
+
     autoChooser = AutoBuilder.buildAutoChooser();
     arm armSub_ = new arm();
     shooter shooter_ = new shooter();
@@ -149,6 +149,7 @@ public class RobotContainer {
     NamedCommands.hasCommand("resetGyro");
     NamedCommands.hasCommand("Raise To Speaker");
 
+    configureBindings();
   }
 
   public Command getAutonomousCommand() {
