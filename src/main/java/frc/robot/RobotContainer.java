@@ -30,7 +30,6 @@ import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
-import frc.robot.commands.PhotonCommand;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subystems.arm;
 import frc.robot.subystems.intake;
@@ -79,10 +78,7 @@ public class RobotContainer {
   private final arm armSub = new arm();
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
-  
-                              /* Commands */
-  private final ArmPIDCommand autoArm = new ArmPIDCommand(10, armSub);
-  
+
   SendableChooser<Command> chooser = new SendableChooser<>();
 
  
@@ -130,7 +126,7 @@ public class RobotContainer {
         armspeakerCloseButton.onTrue(new ArmPIDCommand(-10, armSub));
         armAmpButton.onTrue(new ArmPIDCommand(112.3, armSub));
 
-        photonCommandButton.onTrue(new PhotonCommand(armSub));
+        // photonCommandButton.onTrue(new PhotonCommand(armSub));
 
 
 
@@ -138,7 +134,7 @@ public class RobotContainer {
 
   public RobotContainer() {
     NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.5));
-    NamedCommands.registerCommand("Raise Arm", autoArm);
+    NamedCommands.registerCommand("Raise Arm", new ArmPIDCommand(10, armSub));
     NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5));
     NamedCommands.registerCommand("IntakeStop", intakeSub.intakeAuto(0));
     configureBindings();

@@ -7,6 +7,7 @@ package frc.robot.subystems;
 
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonUtils;
+import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import com.ctre.phoenix6.controls.Follower;
@@ -47,7 +48,8 @@ public class arm extends SubsystemBase {
   public double armTickToDegrees() {
     double motorRotations = leftArm.getPosition().getValueAsDouble() / (ArmConstants.kCountsPerRev * ArmConstants.kArmGearRatio);
     double armTicksPerDegree = motorRotations * ArmConstants.kArmScaleFactor;
-  return -armTicksPerDegree;
+    double offset = 90;
+  return -armTicksPerDegree+offset;
    }
 
   private void resetEncoders(){
@@ -67,31 +69,31 @@ public class arm extends SubsystemBase {
   }
 
 
-  public double calculateAngle(){
-    var result = photonCamera.getLatestResult();
-    boolean hasTargets = result.hasTargets();
-    PhotonTrackedTarget target = result.getBestTarget();
-    int targetID = target.getFiducialId();
+  // public double calculateAngle(){
+  //   var result = photonCamera.getLatestResult();
+  //   boolean hasTargets = result.hasTargets();
+  //   PhotonTrackedTarget target = result.getBestTarget();
+  //   int targetID = target.getFiducialId();
 
-      if(hasTargets && (targetID == 7 || targetID == 4)){
-            System.out.println("\n\nTarget Success\n\n");
-            double range = PhotonUtils.calculateDistanceToTargetMeters(
-            camera_Height, 
-            target_Height, 
-            camera_Pitch, 
-            Units.degreesToRadians(result.getBestTarget().getPitch())); //gets the pitch of the april tag
-            double angle = Math.asin((target_Height+vertoffSet)/range);
-                        System.out.println(range);
-                        System.out.println(angle);
+  //     if(hasTargets && (targetID == 7 || targetID == 4)){
+  //           System.out.println("\n\nTarget Success\n\n");
+  //           double range = PhotonUtils.calculateDistanceToTargetMeters(
+  //           camera_Height, 
+  //           target_Height, 
+  //           camera_Pitch, 
+  //           Units.degreesToRadians(result.getBestTarget().getPitch())); //gets the pitch of the april tag
+  //           double angle = Math.asin((target_Height+vertoffSet)/range);
+  //                       System.out.println(range);
+  //                       System.out.println(angle);
 
-            return angle;
-        }
+  //           return angle;
+  //       }
 
-        else{
-        System.out.println("Target not found");
-            return armTickToDegrees();
-        }
-    }
+  //       else{
+  //       System.out.println("Target not found");
+  //           return armTickToDegrees();
+  //       }
+  //   }
 
 
   @Override
@@ -100,7 +102,7 @@ public class arm extends SubsystemBase {
 
     SmartDashboard.putNumber("Arm Angle", armTickToDegrees());
     SmartDashboard.putNumber("Left Arm Temp", leftmotorTemp());
-    SmartDashboard.putNumber("Photon Angle", calculateAngle());
+    // SmartDashboard.putNumber("Photon Angle", calculateAngle());
 
     //Test 1: -121.3916015625
     //Test 2: -122.13525390625
