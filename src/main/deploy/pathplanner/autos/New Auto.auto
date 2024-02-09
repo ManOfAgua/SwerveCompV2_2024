@@ -22,12 +22,6 @@
           "data": {
             "pathName": "New Path"
           }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Raise To Speaker"
-          }
         }
       ]
     }
