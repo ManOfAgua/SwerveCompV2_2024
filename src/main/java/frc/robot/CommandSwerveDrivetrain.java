@@ -183,6 +183,26 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return -positionMeters;
     }
 
+    public double frontleftMS(){
+            double rotations = (flDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
+            double flspeed = rotations / 6.75;
+            return Units.inchesToMeters(flspeed);
+        }
+      public double frontrightMS(){
+            double rotations = (frDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
+            double frspeed = rotations / 6.75;
+            return Units.inchesToMeters(frspeed);
+        }
+      public double backrightMS(){
+            double rotations = (brDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
+            double brspeed = rotations / 6.75;
+            return Units.inchesToMeters(brspeed);
+        }
+      public double backleftMS(){
+            double rotations = (blDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
+            double blspeed = rotations / 6.75;
+            return Units.inchesToMeters(blspeed);
+        }
 // Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
   private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
   // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
@@ -201,7 +221,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 frDrive.setVoltage(volts.in(Volts));
 
                 blDrive.setVoltage(volts.in(Volts));
-                brDrive.setVoltage(volts.in(Volts));
+                brDrive.setVoltage(-volts.in(Volts));
 
               },
               // Tell SysId how to record a frame of data for each motor on the mechanism being
@@ -209,30 +229,37 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
               log -> {
                 // Record a frame for the left motors.  Since these share an encoder, we consider
                 // the entire group to be one motor.
-                log.motor("drive-left front")
+                log.motor("flDrive")
                     .voltage(
                         m_appliedVoltage.mut_replace(
                             flDrive.get() * RobotController.getBatteryVoltage(), Volts))
                     .linearPosition(m_distance.mut_replace(frontleftrotationsToMeters(), Meters))
                     .linearVelocity(
-                        m_velocity.mut_replace(flDrive.getVelocity().getValueAsDouble(), MetersPerSecond));
+                        m_velocity.mut_replace(frontleftMS(), MetersPerSecond));
+                log.motor("blDrive")
+                    .voltage(
+                        m_appliedVoltage.mut_replace(
+                            blDrive.get() * RobotController.getBatteryVoltage(), Volts))
+                    .linearPosition(m_distance.mut_replace(backleftrotationsToMeters(), Meters))
+                    .linearVelocity(
+                        m_velocity.mut_replace(backleftMS(), MetersPerSecond));
                 // Record a frame for the right motors.  Since these share an encoder, we consider
                 // the entire group to be one motor.
-                log.motor("drive-right front")
+                log.motor("frDrive")
                     .voltage(
                         m_appliedVoltage.mut_replace(
                             frDrive.get() * RobotController.getBatteryVoltage(), Volts))
                     .linearPosition(m_distance.mut_replace(frontrightrotationsToMeters(), Meters))
                     .linearVelocity(
-                        m_velocity.mut_replace(frDrive.getVelocity().getValueAsDouble(), MetersPerSecond));
+                        m_velocity.mut_replace(frontrightMS(),MetersPerSecond));
 
-                log.motor("drive-right back")
+                log.motor("brDrive")
                     .voltage(
                         m_appliedVoltage.mut_replace(
                             brDrive.get() * RobotController.getBatteryVoltage(), Volts))
                     .linearPosition(m_distance.mut_replace(backrightrotationsToMeters(), Meters))
                     .linearVelocity(
-                        m_velocity.mut_replace(brDrive.getVelocity().getValueAsDouble(), MetersPerSecond));
+                        m_velocity.mut_replace(backrightMS(), MetersPerSecond));
               },
               // Tell SysId to make generated commands require this subsystem, suffix test state in
               // WPILog with this subsystem's name ("drive")
@@ -263,6 +290,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 @Override
 public void periodic(){
     SmartDashboard.putNumber("Heading", gyroHeading());
+    SmartDashboard.putNumber("Front Left Distance", frontleftrotationsToMeters());
+    SmartDashboard.putNumber("Front Left Speed", frontleftMS());
 }
 
 }

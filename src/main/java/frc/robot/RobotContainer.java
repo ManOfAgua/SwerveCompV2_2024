@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.IntakeConstants;
@@ -57,8 +58,12 @@ public class RobotContainer {
   private final JoystickButton brakeButton = new JoystickButton(driver, ControllerConstants.b_L2);
   private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_X);//Might be Robot Centric??
 
-  private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R2);
+  private final JoystickButton  intakeButton = new JoystickButton(driver, ControllerConstants.b_R2);
   private final JoystickButton revintakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
+
+  private final JoystickButton sysidQuadFwd = new JoystickButton(driver, ControllerConstants.b_SQR);
+    private final JoystickButton sysidQuadRev = new JoystickButton(driver, ControllerConstants.b_TRI);
+
 
 
                               /*Operator Buttons */
@@ -113,6 +118,16 @@ public class RobotContainer {
         intakeButton.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
         revintakeButton.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
         revintakeButton.whileTrue(new ShooterCommand(-0.2, shooterSub));
+
+        // sysidQuadFwd.whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward)); //sqr
+        // sysidQuadRev.whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)); //tri
+        // intakeButton.whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward)); //R2
+        // revintakeButton.whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse)); //R1
+
+
+
+
+
 
                                         /*Operator Commands*/
         shootButton.whileTrue(new ShooterCommand(ShooterConstants.shooterSpd, shooterSub));
