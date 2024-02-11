@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
+import frc.robot.commands.IntakePIDCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.disabled.Disable;
@@ -128,14 +129,19 @@ public class RobotContainer {
   }
 
   public RobotContainer() {
-    configureBindings();
+   
     autoChooser = AutoBuilder.buildAutoChooser();
     arm armSub_ = new arm();
     shooter shooter_ = new shooter();
+    intake _Intake = new intake();
 
     //Named commands 
     NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(37.18196077f, armSub_));
     NamedCommands.registerCommand("Shoot", new ShooterCommand(1, shooter_));
+    NamedCommands.registerCommand("intake stop", new IntakePIDCommand(MaxAngularRate, _Intake, true));
+    NamedCommands.registerCommand("intake", new IntakePIDCommand(MaxAngularRate, _Intake, false));
+
+    configureBindings();
   }
 
   public Command getAutonomousCommand() {

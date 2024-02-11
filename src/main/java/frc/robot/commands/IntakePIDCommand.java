@@ -18,8 +18,10 @@ private final intake intakeSub;
 private final PIDController armPID;
 private final double goal;
 private boolean done;
+private boolean _stop;
 
-  public IntakePIDCommand(double setPoint, intake intake) {
+  public IntakePIDCommand(double setPoint, intake intake, boolean stop) {
+    stop = _stop;
     this.intakeSub = intake;
     this.goal = setPoint;
     this.armPID = new PIDController(ArmConstants.armKP, ArmConstants.armKI, ArmConstants.armKD);
@@ -39,14 +41,18 @@ private boolean done;
   @Override
   public void execute() {
         done = armPID.atSetpoint();
-    
-    double speed = armPID.calculate(goal);
+    if(_stop)
+    {
+      double speed = armPID.calculate(goal);
     intakeSub.move(-speed);
-
+    }
+    else{
+      intakeSub.move(0);
+    }
+      
     SmartDashboard.putBoolean("Arm Tolerance Check", armPID.atSetpoint());
     SmartDashboard.putNumber("Arm Tolerance", armPID.getPositionError());
-  }
-
+    }
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
