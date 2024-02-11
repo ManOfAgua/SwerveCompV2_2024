@@ -4,7 +4,8 @@
   "holonomicMode": true,
   "pathFolders": [
     "Amp Starting 1",
-    "Amp Starting 2"
+    "Amp Starting 2",
+    "LeftStartShoot"
   ],
   "autoFolders": [],
   "defaultMaxVel": 6.0,
