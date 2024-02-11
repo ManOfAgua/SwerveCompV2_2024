@@ -8,10 +8,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subystems.shooter;
 
 public class ShooterCommand extends Command {
+  boolean disabled;
   private final shooter shooterSub;
   private final double speed;
 
-  public ShooterCommand(double speed, shooter shooter) {
+  public ShooterCommand(double speed, shooter shooter, boolean isDisabled) {
+    isDisabled = disabled;
     this.shooterSub = shooter;
     this.speed = speed;
     addRequirements(shooter);
@@ -24,7 +26,12 @@ public class ShooterCommand extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    shooterSub.move(speed);
+    if(!disabled){
+     shooterSub.move(speed);
+    }
+    else{
+      shooterSub.move(0);
+    }
   }
 
   // Called once the command ends or is interrupted.

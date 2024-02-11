@@ -77,10 +77,10 @@ public class RobotContainer {
                               /* Commands */
   private final ManualArmCommand armFwdCommand = new ManualArmCommand(0.15, armSub);
   private final ManualArmCommand armBckCommand = new ManualArmCommand(-0.15, armSub);
-  private final ShooterCommand shootCommand = new ShooterCommand(1, shooterSub);
+  private final ShooterCommand shootCommand = new ShooterCommand(1, shooterSub, false);
   private final IntakeCommand intakeCommand = new IntakeCommand(0.4, intakeSub);
   private final IntakeCommand intakeRevCommand = new IntakeCommand(-0.2, intakeSub);
-  private final ShooterCommand shootRevCommand = new ShooterCommand(-0.65, shooterSub);
+  private final ShooterCommand shootRevCommand = new ShooterCommand(-0.65, shooterSub, false);
   private final ArmPIDCommand armSourceCommand = new ArmPIDCommand(1, armSub);
 
 
@@ -137,7 +137,10 @@ public class RobotContainer {
 
     //Named commands 
     NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(37.18196077f, armSub_));
-    NamedCommands.registerCommand("Shoot", new ShooterCommand(1, shooter_));
+    //shooter
+    NamedCommands.registerCommand("Shoot", new ShooterCommand(1, shooter_, false));
+    NamedCommands.registerCommand("shoot stop", new ShooterCommand(1, shooter_, true));
+    //intake
     NamedCommands.registerCommand("intake stop", new IntakePIDCommand(MaxAngularRate, _Intake, true));
     NamedCommands.registerCommand("intake", new IntakePIDCommand(MaxAngularRate, _Intake, false));
 
