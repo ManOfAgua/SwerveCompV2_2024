@@ -14,16 +14,20 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.IntakeConstants;
@@ -37,8 +41,8 @@ import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
 public class RobotContainer {
-  private double MaxSpeed = 6; // 6 meters per second desired top speed
-  private double MaxAngularRate = 2.5 * Math.PI; // 1 rotation per second max angular velocity
+  private double MaxSpeed = 3; // 6 meters per second desired top speed
+  private double MaxAngularRate = 2 * Math.PI; // 1 rotation per second max angular velocity
 
 
   /* Setting up bindings for necessary control of the swerve drive platform */
@@ -54,23 +58,24 @@ public class RobotContainer {
 
 
                               /* Driver Buttons */
-  private final JoystickButton resetHeadingButton = new JoystickButton(driver, ControllerConstants.b_O);
-  private final JoystickButton brakeButton = new JoystickButton(driver, ControllerConstants.b_L2);
-  private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_X);//Might be Robot Centric??
+  private final JoystickButton dr_sqr = new JoystickButton(driver, ControllerConstants.b_SQR);
+  private final JoystickButton dr_x = new JoystickButton(driver, ControllerConstants.b_X);
+  private final JoystickButton dr_o = new JoystickButton(driver, ControllerConstants.b_O);
+  private final JoystickButton dr_tri = new JoystickButton(driver, ControllerConstants.b_TRI);
+  private final JoystickButton dr_L1 = new JoystickButton(driver, ControllerConstants.b_L1);
+  private final JoystickButton dr_R1 = new JoystickButton(driver, ControllerConstants.b_R1);
+  private final JoystickButton dr_L2 = new JoystickButton(driver, ControllerConstants.b_L2);
+  private final JoystickButton dr_R2 = new JoystickButton(driver, ControllerConstants.b_R2);
 
-  private final JoystickButton  intakeButton = new JoystickButton(driver, ControllerConstants.b_R2);
-  private final JoystickButton revintakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
-
-  private final JoystickButton sysidQuadFwd = new JoystickButton(driver, ControllerConstants.b_SQR);
-    private final JoystickButton sysidQuadRev = new JoystickButton(driver, ControllerConstants.b_TRI);
-
+  private final POVButton dr_0 = new POVButton(driver, 0);
+  private final POVButton dr_180 = new POVButton(driver, 180);
 
 
                               /*Operator Buttons */
   private final JoystickButton armFwdButton = new JoystickButton(operator, ControllerConstants.b_L2);
   private final JoystickButton armBckButton = new JoystickButton(operator, ControllerConstants.b_R2);
   private final POVButton armAmpButton = new POVButton(operator, 180);
-  private final POVButton armSourceButton = new POVButton(operator, 0);
+  // private final POVButton armSourceButton = new POVButton(operator, 0);
   private final JoystickButton armspeakerFarButton = new JoystickButton(operator, ControllerConstants.b_TRI);
   private final JoystickButton armspeakerCloseButton = new JoystickButton(operator, ControllerConstants.b_X);
   private final POVButton photonCommandButton = new POVButton(operator, 90); //TODO: Choose Button
@@ -103,26 +108,34 @@ public class RobotContainer {
             .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
-    brakeButton.whileTrue(drivetrain.applyRequest(() -> brake));
+    // dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
 
-    robotCentricButton.whileTrue(drivetrain
-        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
+  // dr_x.whileTrue(drivetrain
+  //       .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
-    resetHeadingButton.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
-
+    dr_o.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
 
                                         /*Driver Commands*/
-        intakeButton.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
-        revintakeButton.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
-        revintakeButton.whileTrue(new ShooterCommand(-0.2, shooterSub));
+        dr_R2.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
+        dr_R1.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
+        dr_R1.whileTrue(new ShooterCommand(-0.2, shooterSub));
 
-        // sysidQuadFwd.whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kForward)); //sqr
-        // sysidQuadRev.whileTrue(drivetrain.sysIdQuasistatic(SysIdRoutine.Direction.kReverse)); //tri
-        // intakeButton.whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kForward)); //R2
-        // revintakeButton.whileTrue(drivetrain.sysIdDynamic(SysIdRoutine.Direction.kReverse)); //R1
+                                        /*Sysid Commands*/
+
+        // dr_x.and(dr_0).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
+        // dr_x.and(dr_180).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
+    
+        // dr_o.and(dr_0).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
+        // dr_o.and(dr_180).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
+    
+        // dr_sqr.and(dr_0).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
+        // dr_sqr.and(dr_180).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
+    
+        // dr_tri.and(dr_0).whileTrue(drivetrain.runSteerDynamTest(Direction.kForward));
+        // dr_tri.and(dr_180).whileTrue(drivetrain.runSteerDynamTest(Direction.kReverse));
 
 
 
@@ -136,10 +149,10 @@ public class RobotContainer {
         armFwdButton.whileTrue(new ManualArmCommand(ArmConstants.armSpd, armSub));
         armBckButton.whileTrue(new ManualArmCommand(-ArmConstants.armSpd, armSub));
 
-        armSourceButton.onTrue(new ArmPIDCommand(81.5, armSub));
-        armspeakerFarButton.onTrue(new ArmPIDCommand(10, armSub)); //negative is forward
-        armspeakerCloseButton.onTrue(new ArmPIDCommand(-10, armSub));
-        armAmpButton.onTrue(new ArmPIDCommand(112.3, armSub));
+        // armSourceButton.onTrue(new ArmPIDCommand(81.5, armSub));
+        // armspeakerFarButton.onTrue(new ArmPIDCommand(10, armSub)); //negative is forward
+        armspeakerCloseButton.onTrue(new ArmPIDCommand(26, armSub));
+        armAmpButton.onTrue(new ArmPIDCommand(105, armSub));
 
         // photonCommandButton.onTrue(new PhotonCommand(armSub));
 
@@ -150,8 +163,7 @@ public class RobotContainer {
   public RobotContainer() {
     NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.5));
     NamedCommands.registerCommand("Raise Arm", new ArmPIDCommand(10, armSub));
-    NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5));
-    NamedCommands.registerCommand("IntakeStop", intakeSub.intakeAuto(0));
+    NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5).withTimeout(5));
     configureBindings();
 
     chooser = AutoBuilder.buildAutoChooser();

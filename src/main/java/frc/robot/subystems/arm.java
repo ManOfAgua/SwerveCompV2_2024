@@ -49,7 +49,7 @@ public class arm extends SubsystemBase {
     double motorRotations = leftArm.getPosition().getValueAsDouble() / (ArmConstants.kCountsPerRev * ArmConstants.kArmGearRatio);
     double armTicksPerDegree = motorRotations * ArmConstants.kArmScaleFactor;
     double offset = 90;
-  return -armTicksPerDegree+offset;
+  return -armTicksPerDegree;
    }
 
   private void resetEncoders(){

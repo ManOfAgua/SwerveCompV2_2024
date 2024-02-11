@@ -20,6 +20,7 @@ Follower follower = new Follower(ShooterConstants.shooterTopID, false);
 
   public shooter() {
     brakeMode();
+    shooterTop.setInverted(true);
     shooterBtm.setControl(follower);
   }
 

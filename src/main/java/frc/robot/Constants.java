@@ -15,13 +15,13 @@ public class Constants { //TODO: Tune it
     // The steer motor uses any SwerveModule.SteerRequestType control request with the
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
     private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(105).withKI(0).withKD(0.2) 
-        .withKS(0).withKV(1.5).withKA(0);
+        .withKP(95).withKI(0.2).withKD(0.01) 
+        .withKS(0.011905).withKV(2.1676).withKA(0.043931);
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains = new Slot0Configs()
         .withKP(3).withKI(0).withKD(0)
-        .withKS(0).withKV(0).withKA(0);
+        .withKS(0.089289).withKV(0.10362).withKA(0.022858);
 
     // The closed-loop output type to use for the steer motors;
     // This affects the PID/FF gains for the steer motors
@@ -36,7 +36,7 @@ public class Constants { //TODO: Tune it
 
     // Theoretical free speed (m/s) at 12v applied output;
     // This needs to be tuned to your individual robot
-    public static final double kSpeedAt12VoltsMps = 9.46; //done
+    public static final double kSpeedAt12VoltsMps = 3.3; //done
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot
@@ -172,7 +172,7 @@ public static final class ArmConstants{
         leftarmID = 8, rightarmID = 9;
 
     public static double
-    armSpd = 0.2,
+    armSpd = 0.3,
     armKP = 0.01, armKI = 0.002, armKD = 0.002,
 
     kArmGearRatio = 36.66, kCountsPerRev = 2048, kArmScaleFactor = (360 / (243.316601563/ (kCountsPerRev * kArmGearRatio)));

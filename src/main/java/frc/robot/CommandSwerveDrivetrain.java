@@ -2,7 +2,9 @@ package frc.robot;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
@@ -15,19 +17,16 @@ import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
-import static edu.wpi.first.units.MutableMeasure.mutable;
-import static edu.wpi.first.units.Units.Meters;
-import static edu.wpi.first.units.Units.MetersPerSecond;
-import static edu.wpi.first.units.Units.Volts;
+import static edu.wpi.first.units.Units.*;
 
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.units.Distance;
 import edu.wpi.first.units.Measure;
-import edu.wpi.first.units.MutableMeasure;
-import edu.wpi.first.units.Velocity;
 import edu.wpi.first.units.Voltage;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
+import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -35,6 +34,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.IDConstants;
+import frc.robot.Util.ModifiedSignalLogger;
+import frc.robot.Util.SwerveVoltageRequest;
 
 
 
@@ -64,7 +65,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     TalonFX brSteer = new TalonFX(7);
     TalonFX brDrive = new TalonFX(6);
 
-
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         // coastMode();
@@ -90,9 +90,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
     }
     private void configurePathPlanner() {
-        double driveBaseRadius = 14;
-        gyro = new Pigeon2(IDConstants.gyro);
-        gyro.getConfigurator().apply(new Pigeon2Configuration());
+        double driveBaseRadius = 16.086679272;
         for (var moduleLocation : m_moduleLocations) {
             driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
         }
@@ -102,12 +100,22 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             this::seedFieldRelative,  // Consumer for seeding pose against auto
             this::getCurrentRobotChassisSpeeds,
             (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), // Consumer of ChassisSpeeds to drive the robot
-            new HolonomicPathFollowerConfig(new PIDConstants(10, 0, 0),
-                                            new PIDConstants(10, 0, 0),
+            new HolonomicPathFollowerConfig(new PIDConstants(0, 0, 0.15),
+                                            new PIDConstants(0, 0, 0),
                                             Constants.kSpeedAt12VoltsMps,
                                             driveBaseRadius,
                                             new ReplanningConfig()),
-            ()->false, // Change this if the path needs to be flipped on red vs blue
+            ()->{
+                    // Boolean supplier that controls when the path will be mirrored for the red alliance
+                    // This will flip the path being followed to the red side of the field during auto only.
+                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red & !DriverStation.isTeleop();
+                    }
+                    return false;
+            }, 
             this); // Subsystem for requirements
     }
 
@@ -134,6 +142,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         m_simNotifier.startPeriodic(kSimLoopPeriod);
 
     }
+
 
     public double gyroHeading(){
         return gyro.getYaw().getValueAsDouble();
@@ -173,7 +182,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     
         return -positionMeters;
     }
-
         public double backrightrotationsToMeters(){
         double motorRotations = brDrive.getPosition().getValueAsDouble();
         double wheelRotations = motorRotations / 6.75;
@@ -203,76 +211,56 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             double blspeed = rotations / 6.75;
             return Units.inchesToMeters(blspeed);
         }
-// Mutable holder for unit-safe voltage values, persisted to avoid reallocation.
-  private final MutableMeasure<Voltage> m_appliedVoltage = mutable(Volts.of(0));
-  // Mutable holder for unit-safe linear distance values, persisted to avoid reallocation.
-  private final MutableMeasure<Distance> m_distance = mutable(Meters.of(0));
-  // Mutable holder for unit-safe linear velocity values, persisted to avoid reallocation.
-  private final MutableMeasure<Velocity<Distance>> m_velocity = mutable(MetersPerSecond.of(0));
+    private SwerveVoltageRequest driveVoltageRequest = new SwerveVoltageRequest(true);
 
-  private final SysIdRoutine routine =
-      new SysIdRoutine(
-          // Empty config defaults to 1 volt/second ramp rate and 7 volt step voltage.
-          new SysIdRoutine.Config(),
-          new SysIdRoutine.Mechanism(
-              // Tell SysId how to plumb the driving voltage to the motors.
-              (Measure<Voltage> volts) -> {
-                flDrive.setVoltage(volts.in(Volts));
-                frDrive.setVoltage(volts.in(Volts));
-
-                blDrive.setVoltage(volts.in(Volts));
-                brDrive.setVoltage(-volts.in(Volts));
-
-              },
-              // Tell SysId how to record a frame of data for each motor on the mechanism being
-              // characterized.
-              log -> {
-                // Record a frame for the left motors.  Since these share an encoder, we consider
-                // the entire group to be one motor.
-                log.motor("flDrive")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            flDrive.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(frontleftrotationsToMeters(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(frontleftMS(), MetersPerSecond));
-                log.motor("blDrive")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            blDrive.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(backleftrotationsToMeters(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(backleftMS(), MetersPerSecond));
-                // Record a frame for the right motors.  Since these share an encoder, we consider
-                // the entire group to be one motor.
-                log.motor("frDrive")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            frDrive.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(frontrightrotationsToMeters(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(frontrightMS(),MetersPerSecond));
-
-                log.motor("brDrive")
-                    .voltage(
-                        m_appliedVoltage.mut_replace(
-                            brDrive.get() * RobotController.getBatteryVoltage(), Volts))
-                    .linearPosition(m_distance.mut_replace(backrightrotationsToMeters(), Meters))
-                    .linearVelocity(
-                        m_velocity.mut_replace(backrightMS(), MetersPerSecond));
-              },
-              // Tell SysId to make generated commands require this subsystem, suffix test state in
-              // WPILog with this subsystem's name ("drive")
-              this));
-
-    public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
-        return routine.quasistatic(direction);
-      }
-      
-    public Command sysIdDynamic(SysIdRoutine.Direction direction) {
-        return routine.dynamic(direction);
-      }
-
+    private SysIdRoutine m_driveSysIdRoutine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(null, null, null, ModifiedSignalLogger.logState()),
+            new SysIdRoutine.Mechanism(
+                (Measure<Voltage> volts) -> setControl(driveVoltageRequest.withVoltage(volts.in(Volts))),
+                null,
+                this));
+    private SwerveVoltageRequest steerVoltageRequest = new SwerveVoltageRequest(false);
+    
+    private SysIdRoutine m_steerSysIdRoutine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(null, null, null, ModifiedSignalLogger.logState()),
+            new SysIdRoutine.Mechanism(
+                (Measure<Voltage> volts) -> setControl(steerVoltageRequest.withVoltage(volts.in(Volts))),
+                null,
+                this));
+    
+    private SysIdRoutine m_slipSysIdRoutine =
+        new SysIdRoutine(
+            new SysIdRoutine.Config(Volts.of(0.25).per(Seconds.of(1)), null, null, ModifiedSignalLogger.logState()),
+            new SysIdRoutine.Mechanism(
+                (Measure<Voltage> volts) -> setControl(driveVoltageRequest.withVoltage(volts.in(Volts))),
+                null,
+                this));
+        
+        public Command runDriveQuasiTest(Direction direction)
+        {
+            return m_driveSysIdRoutine.quasistatic(direction);
+        }
+    
+        public Command runDriveDynamTest(SysIdRoutine.Direction direction) {
+            return m_driveSysIdRoutine.dynamic(direction);
+        }
+    
+        public Command runSteerQuasiTest(Direction direction)
+        {
+            return m_steerSysIdRoutine.quasistatic(direction);
+        }
+    
+        public Command runSteerDynamTest(SysIdRoutine.Direction direction) {
+            return m_steerSysIdRoutine.dynamic(direction);
+        }
+    
+        public Command runDriveSlipTest()
+        {
+            return m_slipSysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward);
+        }
+        
     // public void coastMode(){
     //     if(DriverStation.isDisabled()){
     //     flDrive.setNeutralMode(NeutralModeValue.Coast);
@@ -292,6 +280,7 @@ public void periodic(){
     SmartDashboard.putNumber("Heading", gyroHeading());
     SmartDashboard.putNumber("Front Left Distance", frontleftrotationsToMeters());
     SmartDashboard.putNumber("Front Left Speed", frontleftMS());
+    SmartDashboard.putData(new PowerDistribution());
 }
 
 }

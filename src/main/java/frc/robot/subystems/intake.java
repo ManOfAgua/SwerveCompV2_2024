@@ -9,7 +9,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.IntakeConstants;
 
 public class intake extends SubsystemBase {
@@ -29,6 +31,7 @@ public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
       intake.set(speed)
     );
   }
+
   
 public void brakeMode(){
   intake.setNeutralMode(NeutralModeValue.Coast);
