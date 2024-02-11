@@ -6,6 +6,8 @@ import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
@@ -22,6 +24,7 @@ import static edu.wpi.first.units.Units.*;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Current;
 import edu.wpi.first.units.Measure;
 import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -52,23 +55,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         public Pigeon2 gyro;
     private final Field2d m_Field2d = new Field2d();
 
-    
-    
-
-
-    TalonFX flSteer = new TalonFX(2);
-    TalonFX flDrive = new TalonFX(3);
-    TalonFX frSteer = new TalonFX(5);
-    TalonFX frDrive = new TalonFX(4);
-    TalonFX blSteer = new TalonFX(0);
-    TalonFX blDrive = new TalonFX(1);
-    TalonFX brSteer = new TalonFX(7);
-    TalonFX brDrive = new TalonFX(6);
-
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         // coastMode();
         configurePathPlanner();
+        driveLimit();
+        azimuthLimit();
         gyro = new Pigeon2(IDConstants.gyro);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         
@@ -81,9 +73,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         super(driveTrainConstants, modules);
         // coastMode();
         configurePathPlanner();
+        driveLimit();
+        azimuthLimit();
         gyro = new Pigeon2(IDConstants.gyro);
         gyro.getConfigurator().apply(new Pigeon2Configuration());
-        // zeroGyro();
 
         if (Utils.isSimulation()) {
             startSimThread();
@@ -142,8 +135,29 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         m_simNotifier.startPeriodic(kSimLoopPeriod);
 
     }
+    public void driveLimit(){
+        CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+        for (var swerveModule : Modules) {
+            TalonFX driveMotor = swerveModule.getDriveMotor();
+            driveMotor.getConfigurator().refresh(currentLimits);
+        
+            currentLimits.SupplyCurrentLimit = 60;
+            currentLimits.SupplyCurrentLimitEnable = true;
+            driveMotor.getConfigurator().apply(currentLimits);
+    }
+}
 
-
+    public void azimuthLimit(){
+        CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+        for (var swerveModule : Modules) {
+            TalonFX driveMotor = swerveModule.getSteerMotor();
+            driveMotor.getConfigurator().refresh(currentLimits);
+        
+            currentLimits.SupplyCurrentLimit = 50;
+            currentLimits.SupplyCurrentLimitEnable = true;
+            driveMotor.getConfigurator().apply(currentLimits);
+    }
+    }
     public double gyroHeading(){
         return gyro.getYaw().getValueAsDouble();
     }
@@ -157,60 +171,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         System.out.println("Gyro Zero");
     }
 
-    public double frontleftrotationsToMeters(){
-        double motorRotations = flDrive.getPosition().getValueAsDouble();
-        double wheelRotations = motorRotations / 6.75;
-    
-        double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(2));
-    
-        return -positionMeters;
-    }
-       public double frontrightrotationsToMeters(){
-        double motorRotations = frDrive.getPosition().getValueAsDouble();
-        double wheelRotations = motorRotations / 6.75;
-    
-        double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(2));
-    
-        return positionMeters;
-    }
 
-        public double backleftrotationsToMeters(){
-        double motorRotations = blDrive.getPosition().getValueAsDouble();
-        double wheelRotations = motorRotations / 6.75;
-    
-        double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(2));
-    
-        return -positionMeters;
-    }
-        public double backrightrotationsToMeters(){
-        double motorRotations = brDrive.getPosition().getValueAsDouble();
-        double wheelRotations = motorRotations / 6.75;
-    
-        double positionMeters = wheelRotations * (2 * Math.PI * Units.inchesToMeters(2));
-    
-        return -positionMeters;
-    }
-
-    public double frontleftMS(){
-            double rotations = (flDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
-            double flspeed = rotations / 6.75;
-            return Units.inchesToMeters(flspeed);
-        }
-      public double frontrightMS(){
-            double rotations = (frDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
-            double frspeed = rotations / 6.75;
-            return Units.inchesToMeters(frspeed);
-        }
-      public double backrightMS(){
-            double rotations = (brDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
-            double brspeed = rotations / 6.75;
-            return Units.inchesToMeters(brspeed);
-        }
-      public double backleftMS(){
-            double rotations = (blDrive.getVelocity().getValueAsDouble())*(2*Math.PI*2);
-            double blspeed = rotations / 6.75;
-            return Units.inchesToMeters(blspeed);
-        }
     private SwerveVoltageRequest driveVoltageRequest = new SwerveVoltageRequest(true);
 
     private SysIdRoutine m_driveSysIdRoutine =
@@ -278,8 +239,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 @Override
 public void periodic(){
     SmartDashboard.putNumber("Heading", gyroHeading());
-    SmartDashboard.putNumber("Front Left Distance", frontleftrotationsToMeters());
-    SmartDashboard.putNumber("Front Left Speed", frontleftMS());
+
     SmartDashboard.putData(new PowerDistribution());
 }
 

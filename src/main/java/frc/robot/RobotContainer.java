@@ -108,7 +108,7 @@ public class RobotContainer {
             .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
-    // dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
+    dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
 
   // dr_x.whileTrue(drivetrain
   //       .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
