@@ -7,81 +7,61 @@ package frc.robot;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
+import com.fasterxml.jackson.databind.util.Named;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathPlannerAuto;
+import com.pathplanner.lib.path.PathPlannerPath;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
-import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
-import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
+import frc.robot.disabled.Disable;
 import frc.robot.subystems.arm;
 import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
 public class RobotContainer {
-  private double MaxSpeed = 3; // 6 meters per second desired top speed
-  private double MaxAngularRate = 2 * Math.PI; // 1 rotation per second max angular velocity
+  private double MaxSpeed = 6; // 6 meters per second desired top speed
+  private double MaxAngularRate = 1.5 * Math.PI; // 3/4 of a rotation per second max angular velocity
 
+  //Path Planner
+  private final SendableChooser<Command> autoChooser;
 
   /* Setting up bindings for necessary control of the swerve drive platform */
-
-  
-
-                              /* Joysticks */
- private final PS5Controller driver = new PS5Controller(ControllerConstants.driver);
-  private final PS5Controller operator = new PS5Controller(ControllerConstants.operator);
+ // My joystick
+  private final PS5Controller driver = new PS5Controller(0);
+  private final PS5Controller operator = new PS5Controller(1);
   
   private final CommandSwerveDrivetrain drivetrain = Constants.DriveTrain; // My drivetrain
 
 
-
                               /* Driver Buttons */
-  private final JoystickButton dr_sqr = new JoystickButton(driver, ControllerConstants.b_SQR);
-  private final JoystickButton dr_x = new JoystickButton(driver, ControllerConstants.b_X);
-  private final JoystickButton dr_o = new JoystickButton(driver, ControllerConstants.b_O);
-  private final JoystickButton dr_tri = new JoystickButton(driver, ControllerConstants.b_TRI);
-  private final JoystickButton dr_L1 = new JoystickButton(driver, ControllerConstants.b_L1);
-  private final JoystickButton dr_R1 = new JoystickButton(driver, ControllerConstants.b_R1);
-  private final JoystickButton dr_L2 = new JoystickButton(driver, ControllerConstants.b_L2);
-  private final JoystickButton dr_R2 = new JoystickButton(driver, ControllerConstants.b_R2);
-
-  private final POVButton dr_0 = new POVButton(driver, 0);
-  private final POVButton dr_180 = new POVButton(driver, 180);
-
+  private final JoystickButton resetHeadingButton = new JoystickButton(driver, ControllerConstants.b_L1);
+  private final JoystickButton brakeButton = new JoystickButton(driver, ControllerConstants.b_L2);
+  private final JoystickButton tri = new JoystickButton(driver, ControllerConstants.b_TRI); //Might be Robot Centric??
+  private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
+  private final JoystickButton shootButton = new JoystickButton(driver, ControllerConstants.b_X);
+  private final JoystickButton intakeRevButton = new JoystickButton(driver, ControllerConstants.b_SQR);
+  private final JoystickButton robotCentricButton = new JoystickButton(driver, ControllerConstants.b_MIC);
+  private final JoystickButton cascadeButton = new JoystickButton(driver, 0);
 
                               /*Operator Buttons */
   private final JoystickButton armFwdButton = new JoystickButton(operator, ControllerConstants.b_L2);
   private final JoystickButton armBckButton = new JoystickButton(operator, ControllerConstants.b_R2);
-  private final POVButton armAmpButton = new POVButton(operator, 180);
-  // private final POVButton armSourceButton = new POVButton(operator, 0);
-  private final JoystickButton armspeakerFarButton = new JoystickButton(operator, ControllerConstants.b_TRI);
-  private final JoystickButton armspeakerCloseButton = new JoystickButton(operator, ControllerConstants.b_X);
-  private final POVButton photonCommandButton = new POVButton(operator, 90); //TODO: Choose Button
-
-  private final JoystickButton shootButton = new JoystickButton(operator, ControllerConstants.b_O);
-  private final JoystickButton shootSlowButton = new JoystickButton(operator, ControllerConstants.b_SQR);
+  private final JoystickButton sourceButton = new JoystickButton(operator, 0);
+  private final JoystickButton ampButton = new JoystickButton(operator, 0);
 
 
                               /* Subsystems */
@@ -89,17 +69,32 @@ public class RobotContainer {
   private final shooter shooterSub = new shooter();
   private final intake intakeSub = new intake();
 
-  SendableChooser<Command> chooser = new SendableChooser<>();
 
- 
+                              /* Auto ArmCommands */
+  private final ArmPIDCommand arm_RaiseToSpeaker = new ArmPIDCommand(37.18196077f, armSub);
+
+                              /* Commands */
+  private final ManualArmCommand armFwdCommand = new ManualArmCommand(0.15, armSub);
+  private final ManualArmCommand armBckCommand = new ManualArmCommand(-0.15, armSub);
+  private final ShooterCommand shootCommand = new ShooterCommand(1, shooterSub);
+  private final IntakeCommand intakeCommand = new IntakeCommand(0.4, intakeSub);
+  private final IntakeCommand intakeRevCommand = new IntakeCommand(-0.2, intakeSub);
+  private final ShooterCommand shootRevCommand = new ShooterCommand(-0.65, shooterSub);
+  private final ArmPIDCommand armSourceCommand = new ArmPIDCommand(1, armSub);
+
+
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
       .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                // driving in open loop
 
+  // private final SwerveRequest.RobotCentric RobotCentricDrive = new SwerveRequest.RobotCentric()
+  //     .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1)
+  //     .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  // private final Telemetry logger = new Telemetry(MaxSpeed);
+ // private final Telemetry logger = new Telemetry(MaxSpeed);
 
   private void configureBindings() {
         drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
@@ -108,71 +103,49 @@ public class RobotContainer {
             .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
-    // dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
+    
 
-  // dr_x.whileTrue(drivetrain
-  //       .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
+    brakeButton.whileTrue(drivetrain.applyRequest(() -> brake));
+    tri.whileTrue(drivetrain
+        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
 
-    dr_o.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+    // reset the field-centric heading on left bumper press
+    resetHeadingButton.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
-
-                                        /*Driver Commands*/
-        dr_R2.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
-        dr_R1.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
-        dr_R1.whileTrue(new ShooterCommand(-0.2, shooterSub));
-
-                                        /*Sysid Commands*/
-
-        // dr_x.and(dr_0).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
-        // dr_x.and(dr_180).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
+   // drivetrain.registerTelemetry(logger::telemeterize);
     
-        // dr_o.and(dr_0).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
-        // dr_o.and(dr_180).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
-    
-        // dr_sqr.and(dr_0).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
-        // dr_sqr.and(dr_180).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
-    
-        // dr_tri.and(dr_0).whileTrue(drivetrain.runSteerDynamTest(Direction.kForward));
-        // dr_tri.and(dr_180).whileTrue(drivetrain.runSteerDynamTest(Direction.kReverse));
-
-
-
-
-
-
-                                        /*Operator Commands*/
-        shootButton.whileTrue(new ShooterCommand(ShooterConstants.shooterSpd, shooterSub));
-        shootSlowButton.whileTrue(new ShooterCommand(ShooterConstants.shooterSlwSpd, shooterSub));
-
-        armFwdButton.whileTrue(new ManualArmCommand(ArmConstants.armSpd, armSub));
-        armBckButton.whileTrue(new ManualArmCommand(-ArmConstants.armSpd, armSub));
-
-        // armSourceButton.onTrue(new ArmPIDCommand(81.5, armSub));
-        // armspeakerFarButton.onTrue(new ArmPIDCommand(10, armSub)); //negative is forward
-        armspeakerCloseButton.onTrue(new ArmPIDCommand(26, armSub));
-        armAmpButton.onTrue(new ArmPIDCommand(105, armSub));
-
-        // photonCommandButton.onTrue(new PhotonCommand(armSub));
-
-
+    /*Buttons */
+        shootButton.whileTrue(shootCommand);
+        intakeButton.whileTrue(intakeCommand);
+        intakeRevButton.whileTrue(intakeRevCommand);
+        intakeRevButton.whileTrue(shootRevCommand);
+        armFwdButton.whileTrue(armFwdCommand);
+        armBckButton.whileTrue(armBckCommand);
 
   }
 
   public RobotContainer() {
-    NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.5));
-    NamedCommands.registerCommand("Raise Arm", new ArmPIDCommand(10, armSub));
-    NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5).withTimeout(5));
     configureBindings();
+    autoChooser = AutoBuilder.buildAutoChooser();
+    arm armSub_ = new arm();
+    shooter shooter_ = new shooter();
 
-    chooser = AutoBuilder.buildAutoChooser();
-    SmartDashboard.putData(chooser);
-    drivetrain.zeroGyro();
-    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::zeroGyro));
+    //Named commands 
+    NamedCommands.registerCommand("Raise To Speaker", new ArmPIDCommand(37.18196077f, armSub_));
+    NamedCommands.registerCommand("Shoot", new ShooterCommand(1, shooter_));
   }
 
   public Command getAutonomousCommand() {
-    return chooser.getSelected();
+    return new PathPlannerAuto("New Auto");
   }
+
+  /*
+    public Command getDisableCommand() {
+    return new Disable(drivetrain);
+  }
+   */
+ 
 }
