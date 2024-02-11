@@ -239,7 +239,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 @Override
 public void periodic(){
     SmartDashboard.putNumber("Heading", gyroHeading());
-
     SmartDashboard.putData(new PowerDistribution());
 }
 

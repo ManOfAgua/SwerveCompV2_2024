@@ -172,8 +172,8 @@ public static final class ArmConstants{
         leftarmID = 8, rightarmID = 9;
 
     public static double
-    armSpd = 0.3,
-    armKP = 0.01, armKI = 0.002, armKD = 0.002,
+    armSpd = 0.35,
+    armKP = 0.02, armKI = 0.003, armKD = 0.002,
 
     kArmGearRatio = 36.66, kCountsPerRev = 2048, kArmScaleFactor = (360 / (243.316601563/ (kCountsPerRev * kArmGearRatio)));
 }

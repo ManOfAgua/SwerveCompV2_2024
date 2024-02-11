@@ -5,6 +5,7 @@
 package frc.robot.subystems;
 
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
@@ -19,6 +20,7 @@ public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
 
   public intake() {
     brakeMode();
+    currentLimit();
   }
 
   public void move(double speed){
@@ -31,7 +33,14 @@ public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
       intake.set(speed)
     );
   }
+  public void currentLimit(){
+    CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
+    intake.getConfigurator().refresh(currentLimit);
 
+    currentLimit.SupplyCurrentLimit = 20;
+    currentLimit.SupplyCurrentLimitEnable = true;
+    intake.getConfigurator().apply(currentLimit);
+  }
   
 public void brakeMode(){
   intake.setNeutralMode(NeutralModeValue.Coast);

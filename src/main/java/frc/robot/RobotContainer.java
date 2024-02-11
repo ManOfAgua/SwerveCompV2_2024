@@ -14,12 +14,14 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.wpilibj.GenericHID.RumbleType;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -41,7 +43,7 @@ import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
 public class RobotContainer {
-  private double MaxSpeed = 3; // 6 meters per second desired top speed
+  private double MaxSpeed = 4.8; // 4.8 meters per second desired top speed
   private double MaxAngularRate = 2 * Math.PI; // 1 rotation per second max angular velocity
 
 
@@ -90,6 +92,7 @@ public class RobotContainer {
   private final intake intakeSub = new intake();
 
   SendableChooser<Command> chooser = new SendableChooser<>();
+  private boolean robotCentric = false;
 
  
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -108,11 +111,11 @@ public class RobotContainer {
             .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
             .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
+
     dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
 
   // dr_x.whileTrue(drivetrain
   //       .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
-
     dr_o.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
@@ -159,6 +162,7 @@ public class RobotContainer {
 
 
   }
+  
 
   public RobotContainer() {
     NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.5));
@@ -174,5 +178,12 @@ public class RobotContainer {
 
   public Command getAutonomousCommand() {
     return chooser.getSelected();
+  }
+
+  public Command rumbleSequence(){
+    Command rumbleCommand =  new InstantCommand(() -> driver.setRumble(RumbleType.kBothRumble, 1));
+    Command stopRumbleCommand =  new InstantCommand(() -> driver.setRumble(RumbleType.kBothRumble, 0));
+    return rumbleCommand.andThen(new WaitCommand(0.5)).andThen(stopRumbleCommand);
+   
   }
 }

@@ -4,6 +4,7 @@
 
 package frc.robot.subystems;
 
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -17,9 +18,11 @@ TalonFX shooterTop = new TalonFX(ShooterConstants.shooterTopID);
 TalonFX shooterBtm = new TalonFX(ShooterConstants.shooterBtmID);
 
 Follower follower = new Follower(ShooterConstants.shooterTopID, false);
+public boolean robotCentric;
 
   public shooter() {
-    brakeMode();
+    coastMode();
+    currentLimit();
     shooterTop.setInverted(true);
     shooterBtm.setControl(follower);
   }
@@ -35,8 +38,20 @@ Follower follower = new Follower(ShooterConstants.shooterTopID, false);
     );
   }
 
-  public void brakeMode(){
+  public void coastMode(){
     shooterTop.setNeutralMode(NeutralModeValue.Coast);
+  }
+
+  public void currentLimit(){
+    CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
+    shooterTop.getConfigurator().refresh(currentLimit);
+    shooterBtm.getConfigurator().refresh(currentLimit);
+
+    currentLimit.SupplyCurrentLimit = 50;
+    currentLimit.SupplyCurrentLimitEnable = true;
+    shooterTop.getConfigurator().apply(currentLimit);
+    shooterBtm.getConfigurator().apply(currentLimit);
+
   }
 
   @Override
