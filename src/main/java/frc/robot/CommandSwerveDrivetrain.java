@@ -250,28 +250,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         
     }
 
-CANcoder flCAN = new CANcoder(14);
-CANcoder blCAN = new CANcoder(13);
-CANcoder frCAN = new CANcoder(15);
-CANcoder brCAN = new CANcoder(16);
-TalonFX flSteer = new TalonFX(2);
-TalonFX frSteer = new TalonFX(5);
-TalonFX blSteer = new TalonFX(0);
-TalonFX brSteer = new TalonFX(7);
-TalonFX flDrive = new TalonFX(3);
-
+    public double[] stator(){
+       double[] currents = new double[Modules.length];
+       for (int i = 0; i< Modules.length; i++) {
+        currents[i] = Modules[i].getDriveMotor().getStatorCurrent().getValue();
+       }
+       return currents;
+    }
 @Override
 public void periodic(){
     SmartDashboard.putNumber("Heading", gyroHeading());
-    SmartDashboard.putNumber("FL Encoder", flCAN.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("BL Encoder", blCAN.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("FR Encoder", frCAN.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("BR Encoder", brCAN.getPosition().getValueAsDouble());
-    SmartDashboard.putNumber("FLVoltage", flSteer.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("FRVoltage", frSteer.getMotorVoltage().getValueAsDouble());
-                SmartDashboard.putNumber("BRVoltage", brSteer.getMotorVoltage().getValueAsDouble());
-                SmartDashboard.putNumber("BLVoltage", blSteer.getMotorVoltage().getValueAsDouble());
-                SmartDashboard.putNumber("Stator Current", flDrive.getStatorCurrent().getValueAsDouble());
+                SmartDashboard.putNumberArray("Stator Current", stator());
 
 
 }
