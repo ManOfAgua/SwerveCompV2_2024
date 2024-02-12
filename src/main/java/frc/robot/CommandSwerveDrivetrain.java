@@ -69,7 +69,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         steerMotor.getPosition(),
         steerMotor.getVelocity(),
         steerMotor.getMotorVoltage());
-        steerMotor.optimizeBusUtilization();
+        // steerMotor.optimizeBusUtilization();
         }
         configurePathPlanner();
         driveLimit();
@@ -91,7 +91,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         steerMotor.getPosition(),
         steerMotor.getVelocity(),
         steerMotor.getMotorVoltage());
-        steerMotor.optimizeBusUtilization();
+        // steerMotor.optimizeBusUtilization();
         }
         configurePathPlanner();
         driveLimit();
@@ -258,6 +258,7 @@ TalonFX flSteer = new TalonFX(2);
 TalonFX frSteer = new TalonFX(5);
 TalonFX blSteer = new TalonFX(0);
 TalonFX brSteer = new TalonFX(7);
+TalonFX flDrive = new TalonFX(3);
 
 @Override
 public void periodic(){
@@ -270,6 +271,7 @@ public void periodic(){
         SmartDashboard.putNumber("FRVoltage", frSteer.getMotorVoltage().getValueAsDouble());
                 SmartDashboard.putNumber("BRVoltage", brSteer.getMotorVoltage().getValueAsDouble());
                 SmartDashboard.putNumber("BLVoltage", blSteer.getMotorVoltage().getValueAsDouble());
+                SmartDashboard.putNumber("Stator Current", flDrive.getStatorCurrent().getValueAsDouble());
 
 
 }
