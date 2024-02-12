@@ -36,6 +36,7 @@ import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
+import frc.robot.commands.IntakePIDCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
 import frc.robot.subystems.arm;
@@ -43,8 +44,8 @@ import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
 public class RobotContainer {
-  private double MaxSpeed = 4.8; // 4.8 meters per second desired top speed
-  private double MaxAngularRate = 2 * Math.PI; // 1 rotation per second max angular velocity
+  private double MaxSpeed = 3.5; // 4 meters per second desired top speed
+  private double MaxAngularRate = 1.75 * Math.PI; // 1 rotation per second max angular velocity
 
 
   /* Setting up bindings for necessary control of the swerve drive platform */
@@ -122,23 +123,23 @@ public class RobotContainer {
     }
 
                                         /*Driver Commands*/
-        dr_R2.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
-        dr_R1.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
-        dr_R1.whileTrue(new ShooterCommand(-0.2, shooterSub));
+        // dr_R2.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
+        // dr_R1.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
+        // dr_R1.whileTrue(new ShooterCommand(-0.2, shooterSub));
 
                                         /*Sysid Commands*/
 
-        // dr_x.and(dr_0).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
-        // dr_x.and(dr_180).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
+        dr_x.and(dr_0).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
+        dr_x.and(dr_180).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
     
-        // dr_o.and(dr_0).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
-        // dr_o.and(dr_180).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
+        dr_o.and(dr_0).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
+        dr_o.and(dr_180).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
     
-        // dr_sqr.and(dr_0).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
-        // dr_sqr.and(dr_180).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
+        dr_sqr.and(dr_0).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
+        dr_sqr.and(dr_180).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
     
-        // dr_tri.and(dr_0).whileTrue(drivetrain.runSteerDynamTest(Direction.kForward));
-        // dr_tri.and(dr_180).whileTrue(drivetrain.runSteerDynamTest(Direction.kReverse));
+        dr_tri.and(dr_0).whileTrue(drivetrain.runSteerDynamTest(Direction.kForward));
+        dr_tri.and(dr_180).whileTrue(drivetrain.runSteerDynamTest(Direction.kReverse));
 
 
 
@@ -165,9 +166,10 @@ public class RobotContainer {
   
 
   public RobotContainer() {
-    NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.5));
-    NamedCommands.registerCommand("Raise Arm", new ArmPIDCommand(10, armSub));
-    NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5).withTimeout(5));
+    NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.7).withTimeout(2));
+    NamedCommands.registerCommand("Lower Arm", new ArmPIDCommand(15, armSub));
+    NamedCommands.registerCommand("Intake", intakeSub.intakeAuto1(0.5).withTimeout(1));
+    NamedCommands.registerCommand("Lower Arm Ground", new ArmPIDCommand(1, armSub));
     configureBindings();
 
     chooser = AutoBuilder.buildAutoChooser();

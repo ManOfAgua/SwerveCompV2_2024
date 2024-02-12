@@ -2,8 +2,8 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 1.48,
-      "y": 7.37
+      "x": 2,
+      "y": 7.0
     },
     "rotation": 0
   },
@@ -14,13 +14,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "AmpPath1"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "AmpPath2"
+            "pathName": "Path2"
           }
         }
       ]

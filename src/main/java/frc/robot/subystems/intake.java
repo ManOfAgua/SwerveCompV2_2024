@@ -10,6 +10,7 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -20,27 +21,22 @@ public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
 
   public intake() {
     brakeMode();
-    currentLimit();
   }
 
   public void move(double speed){
   intake.set(speed);
   }
 
-  public Command intakeAuto(double speed){
+  public Command intakeAuto1(double speed){
     return run(
       () -> 
       intake.set(speed)
-    );
+      )
+     .finallyDo(() -> move(0));
   }
-  public void currentLimit(){
-    CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
-    intake.getConfigurator().refresh(currentLimit);
 
-    currentLimit.SupplyCurrentLimit = 20;
-    currentLimit.SupplyCurrentLimitEnable = true;
-    intake.getConfigurator().apply(currentLimit);
-  }
+  
+
   
 public void brakeMode(){
   intake.setNeutralMode(NeutralModeValue.Coast);

@@ -12,16 +12,18 @@ import edu.wpi.first.math.util.Units;
 public class Constants { //TODO: Tune it
     // Both sets of gains need to be tuned to your individual robot.
 
-    // The steer motor uses any SwerveModule.SteerRequestType control request with the
+    // The steer motor uses any SwerveModule.SteerRequestType control request with the  
     // output type specified by SwerveModuleConstants.SteerMotorClosedLoopOutput
-    private static final Slot0Configs steerGains = new Slot0Configs()
-        .withKP(95).withKI(0.2).withKD(0.01) 
-        .withKS(0.011905).withKV(2.1676).withKA(0.043931);
+    private static final Slot0Configs steerGains = new Slot0Configs() 
+        .withKP(0.2).withKI(0).withKD(0.001)  
+        .withKS(0.21232).withKV(2.4023).withKA(0);
+
     // When using closed-loop control, the drive motor uses the control
     // output type specified by SwerveModuleConstants.DriveMotorClosedLoopOutput
     private static final Slot0Configs driveGains = new Slot0Configs()
-        .withKP(3).withKI(0).withKD(0)
-        .withKS(0.089289).withKV(0.10362).withKA(0.022858);
+        .withKP(0.039727).withKI(0).withKD(0)
+
+        .withKS(0.21658).withKV(0.10772).withKA(0);
 
     // The closed-loop output type to use for the steer motors;
     // This affects the PID/FF gains for the steer motors
@@ -36,15 +38,15 @@ public class Constants { //TODO: Tune it
 
     // Theoretical free speed (m/s) at 12v applied output;
     // This needs to be tuned to your individual robot
-    public static final double kSpeedAt12VoltsMps = 3.3; //done
+    public static final double kSpeedAt12VoltsMps = 4.73; //done
 
     // Every 1 rotation of the azimuth results in kCoupleRatio drive motor turns;
     // This may need to be tuned to your individual robot
-    private static final double kCoupleRatio = 3.5714285714285716;
+    private static final double kCoupleRatio = 3.5714285714285716; //done
 
-    private static final double kDriveGearRatio = 6.746031746031747;
+    private static final double kDriveGearRatio = 6.75;
     private static final double kSteerGearRatio = 21.428571428571427;
-    private static final double kWheelRadiusInches = 4;
+    private static final double kWheelRadiusInches = 2;
 
     private static final boolean kSteerMotorReversed = true;
     private static final boolean kInvertLeftSide = false;
@@ -88,7 +90,7 @@ public class Constants { //TODO: Tune it
     private static final int kFrontLeftDriveMotorId = 3;
     private static final int kFrontLeftSteerMotorId = 2;
     private static final int kFrontLeftEncoderId = 14;
-    private static final double kFrontLeftEncoderOffset = 0.30810546875;
+    private static final double kFrontLeftEncoderOffset = 0.31494140625;
 
     private static final double kFrontLeftXPosInches = 11.375;
     private static final double kFrontLeftYPosInches = 11.375;
@@ -97,7 +99,7 @@ public class Constants { //TODO: Tune it
     private static final int kFrontRightDriveMotorId = 4;
     private static final int kFrontRightSteerMotorId = 5;
     private static final int kFrontRightEncoderId = 15;
-    private static final double kFrontRightEncoderOffset = -0.330810546875;
+    private static final double kFrontRightEncoderOffset = -0.3330078125;
 
     private static final double kFrontRightXPosInches = 11.375;
     private static final double kFrontRightYPosInches = -11.375;
@@ -106,7 +108,7 @@ public class Constants { //TODO: Tune it
     private static final int kBackLeftDriveMotorId = 1;
     private static final int kBackLeftSteerMotorId = 0;
     private static final int kBackLeftEncoderId = 13;
-    private static final double kBackLeftEncoderOffset = 0.266845703125;
+    private static final double kBackLeftEncoderOffset = 0.264404296875;
 
     private static final double kBackLeftXPosInches = -11.375;
     private static final double kBackLeftYPosInches = 11.375;
@@ -115,7 +117,7 @@ public class Constants { //TODO: Tune it
     private static final int kBackRightDriveMotorId = 6;
     private static final int kBackRightSteerMotorId = 7;
     private static final int kBackRightEncoderId = 16;
-    private static final double kBackRightEncoderOffset = -0.188232421875;
+    private static final double kBackRightEncoderOffset = -0.19384765625;
 
     private static final double kBackRightXPosInches = -11.375;
     private static final double kBackRightYPosInches = -11.375;
@@ -153,7 +155,7 @@ public static final class IntakeConstants{
         intakeID = 10;
 
     public static double 
-        intakeSpd = 0.4;
+        intakeSpd = 0.6;
         }
 
 public static final class ShooterConstants{
@@ -162,7 +164,7 @@ public static final class ShooterConstants{
         shooterBtmID = 50;
 
     public static double 
-        shooterSpd = 0.65,
+        shooterSpd = 0.8,
         shooterSlwSpd = 0.10,
     shooterKP = 0.1, shooterKI = 0.0, shooterKD = 0.0;
 }

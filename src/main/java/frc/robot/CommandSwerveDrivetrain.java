@@ -2,18 +2,21 @@ package frc.robot;
 
 import java.util.function.Supplier;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.Utils;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Pigeon2Configuration;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.Pigeon2;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModuleConstants;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
@@ -31,6 +34,7 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Notifier;
 import edu.wpi.first.wpilibj.PowerDistribution;
 import edu.wpi.first.wpilibj.RobotController;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -54,10 +58,19 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
         public Pigeon2 gyro;
     private final Field2d m_Field2d = new Field2d();
+    
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
         // coastMode();
+        for (var swerveModule : Modules) {
+            TalonFX steerMotor = swerveModule.getDriveMotor();
+        BaseStatusSignal.setUpdateFrequencyForAll(250,
+        steerMotor.getPosition(),
+        steerMotor.getVelocity(),
+        steerMotor.getMotorVoltage());
+        steerMotor.optimizeBusUtilization();
+        }
         configurePathPlanner();
         driveLimit();
         azimuthLimit();
@@ -72,6 +85,14 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
         // coastMode();
+          for (var swerveModule : Modules) {
+            TalonFX steerMotor = swerveModule.getDriveMotor();
+        BaseStatusSignal.setUpdateFrequencyForAll(250,
+        steerMotor.getPosition(),
+        steerMotor.getVelocity(),
+        steerMotor.getMotorVoltage());
+        steerMotor.optimizeBusUtilization();
+        }
         configurePathPlanner();
         driveLimit();
         azimuthLimit();
@@ -83,7 +104,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         }
     }
     private void configurePathPlanner() {
-        double driveBaseRadius = 16.086679272;
+        double driveBaseRadius = 14;
         for (var moduleLocation : m_moduleLocations) {
             driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
         }
@@ -93,22 +114,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             this::seedFieldRelative,  // Consumer for seeding pose against auto
             this::getCurrentRobotChassisSpeeds,
             (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), // Consumer of ChassisSpeeds to drive the robot
-            new HolonomicPathFollowerConfig(new PIDConstants(0, 0, 0.15),
-                                            new PIDConstants(0, 0, 0),
+            new HolonomicPathFollowerConfig(new PIDConstants(10, 0, 0),
+                                            new PIDConstants(10, 0, 0),
                                             Constants.kSpeedAt12VoltsMps,
                                             driveBaseRadius,
                                             new ReplanningConfig()),
-            ()->{
-                    // Boolean supplier that controls when the path will be mirrored for the red alliance
-                    // This will flip the path being followed to the red side of the field during auto only.
-                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
-                    var alliance = DriverStation.getAlliance();
-                    if (alliance.isPresent()) {
-                        return alliance.get() == DriverStation.Alliance.Red & !DriverStation.isTeleop();
-                    }
-                    return false;
-            }, 
+            ()-> false,
             this); // Subsystem for requirements
     }
 
@@ -119,7 +130,12 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public ChassisSpeeds getCurrentRobotChassisSpeeds() {
         return m_kinematics.toChassisSpeeds(getState().ModuleStates);
     }
-
+    public Command idk(){
+        return run(
+    ()->
+        getCurrentRobotChassisSpeeds()
+        );
+    }
     private void startSimThread() {
         m_lastSimTime = Utils.getCurrentTimeSeconds();
 
@@ -141,7 +157,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             TalonFX driveMotor = swerveModule.getDriveMotor();
             driveMotor.getConfigurator().refresh(currentLimits);
         
-            currentLimits.SupplyCurrentLimit = 60;
+            currentLimits.SupplyCurrentLimit = 40;
+            currentLimits.SupplyCurrentThreshold = 60;
+            currentLimits.SupplyTimeThreshold = 0.1;
             currentLimits.SupplyCurrentLimitEnable = true;
             driveMotor.getConfigurator().apply(currentLimits);
     }
@@ -153,7 +171,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             TalonFX driveMotor = swerveModule.getSteerMotor();
             driveMotor.getConfigurator().refresh(currentLimits);
         
-            currentLimits.SupplyCurrentLimit = 50;
+            currentLimits.SupplyCurrentLimit = 40;
+            currentLimits.SupplyCurrentThreshold = 50;
+            currentLimits.SupplyTimeThreshold = 0.1;
             currentLimits.SupplyCurrentLimitEnable = true;
             driveMotor.getConfigurator().apply(currentLimits);
     }
@@ -176,7 +196,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     private SysIdRoutine m_driveSysIdRoutine =
         new SysIdRoutine(
-            new SysIdRoutine.Config(null, null, null, ModifiedSignalLogger.logState()),
+            new SysIdRoutine.Config(null, Volts.of(4), null, ModifiedSignalLogger.logState()),
             new SysIdRoutine.Mechanism(
                 (Measure<Voltage> volts) -> setControl(driveVoltageRequest.withVoltage(volts.in(Volts))),
                 null,
@@ -222,23 +242,36 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             return m_slipSysIdRoutine.quasistatic(SysIdRoutine.Direction.kForward);
         }
         
-    // public void coastMode(){
-    //     if(DriverStation.isDisabled()){
-    //     flDrive.setNeutralMode(NeutralModeValue.Coast);
-    //     frDrive.setNeutralMode(NeutralModeValue.Coast);
-    //     blDrive.setNeutralMode(NeutralModeValue.Coast);
-    //     brDrive.setNeutralMode(NeutralModeValue.Coast);
-    //     flSteer.setNeutralMode(NeutralModeValue.Coast);
-    //     frSteer.setNeutralMode(NeutralModeValue.Coast);
-    //     blSteer.setNeutralMode(NeutralModeValue.Coast);
-    //     brSteer.setNeutralMode(NeutralModeValue.Coast);
-    //     }
-    // }
+    public void coastMode(){
+          for (var swerveModule : Modules) {
+            TalonFX driveMotor = swerveModule.getSteerMotor();
+            driveMotor.setNeutralMode(NeutralModeValue.Coast);
+        }
+        
+    }
 
+CANcoder flCAN = new CANcoder(14);
+CANcoder blCAN = new CANcoder(13);
+CANcoder frCAN = new CANcoder(15);
+CANcoder brCAN = new CANcoder(16);
+TalonFX flSteer = new TalonFX(2);
+TalonFX frSteer = new TalonFX(5);
+TalonFX blSteer = new TalonFX(0);
+TalonFX brSteer = new TalonFX(7);
 
 @Override
 public void periodic(){
     SmartDashboard.putNumber("Heading", gyroHeading());
+    SmartDashboard.putNumber("FL Encoder", flCAN.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("BL Encoder", blCAN.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("FR Encoder", frCAN.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("BR Encoder", brCAN.getPosition().getValueAsDouble());
+    SmartDashboard.putNumber("FLVoltage", flSteer.getMotorVoltage().getValueAsDouble());
+        SmartDashboard.putNumber("FRVoltage", frSteer.getMotorVoltage().getValueAsDouble());
+                SmartDashboard.putNumber("BRVoltage", brSteer.getMotorVoltage().getValueAsDouble());
+                SmartDashboard.putNumber("BLVoltage", blSteer.getMotorVoltage().getValueAsDouble());
+
+
 }
 
 }

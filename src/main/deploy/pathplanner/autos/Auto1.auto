@@ -1,26 +1,26 @@
 {
   "version": 1.0,
-  "startingPose": {
-    "position": {
-      "x": 0.42,
-      "y": 2.01
-    },
-    "rotation": 0
-  },
+  "startingPose": null,
   "command": {
     "type": "sequential",
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "Path1"
+            "name": "Lower Arm"
           }
         },
         {
-          "type": "sequential",
+          "type": "parallel",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Shoot"
+                }
+              },
               {
                 "type": "named",
                 "data": {
@@ -28,6 +28,12 @@
                 }
               }
             ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Lower Arm Ground"
           }
         }
       ]

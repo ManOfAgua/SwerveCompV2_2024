@@ -22,7 +22,6 @@ public boolean robotCentric;
 
   public shooter() {
     coastMode();
-    currentLimit();
     shooterTop.setInverted(true);
     shooterBtm.setControl(follower);
   }
@@ -35,23 +34,12 @@ public boolean robotCentric;
     return run(
       () -> 
       shooterTop.set(speed)
-    );
+    )
+    .finallyDo(() -> move(0));
   }
 
   public void coastMode(){
     shooterTop.setNeutralMode(NeutralModeValue.Coast);
-  }
-
-  public void currentLimit(){
-    CurrentLimitsConfigs currentLimit = new CurrentLimitsConfigs();
-    shooterTop.getConfigurator().refresh(currentLimit);
-    shooterBtm.getConfigurator().refresh(currentLimit);
-
-    currentLimit.SupplyCurrentLimit = 50;
-    currentLimit.SupplyCurrentLimitEnable = true;
-    shooterTop.getConfigurator().apply(currentLimit);
-    shooterBtm.getConfigurator().apply(currentLimit);
-
   }
 
   @Override
