@@ -22,12 +22,26 @@ public boolean robotCentric;
 
   public shooter() {
     coastMode();
+    currentlimit();
     shooterTop.setInverted(true);
     shooterBtm.setControl(follower);
   }
 
   public void move(double speed){
     shooterTop.set(speed);
+  }
+
+  public void currentlimit(){
+    CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+    shooterTop.getConfigurator().refresh(currentLimits);
+    shooterBtm.getConfigurator().refresh(currentLimits);
+
+    currentLimits.SupplyCurrentLimit = 50;
+    currentLimits.SupplyCurrentThreshold = 60;
+    currentLimits.SupplyTimeThreshold = 0.1;
+    currentLimits.SupplyCurrentLimitEnable = true;
+    shooterTop.getConfigurator().apply(currentLimits);
+    shooterBtm.getConfigurator().apply(currentLimits);
   }
 
   public Command shootAuto(double speed){

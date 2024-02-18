@@ -1,6 +1,12 @@
 {
   "version": 1.0,
-  "startingPose": null,
+  "startingPose": {
+    "position": {
+      "x": 0.77,
+      "y": 6.56
+    },
+    "rotation": 60.0
+  },
   "command": {
     "type": "sequential",
     "data": {
@@ -31,9 +37,28 @@
           }
         },
         {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Lower Arm Ground"
+                }
+              },
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Amp1"
+                }
+              }
+            ]
+          }
+        },
+        {
           "type": "named",
           "data": {
-            "name": "Lower Arm Ground"
+            "name": "PickupAmp"
           }
         }
       ]

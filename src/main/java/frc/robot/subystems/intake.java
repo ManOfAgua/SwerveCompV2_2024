@@ -21,10 +21,22 @@ public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
 
   public intake() {
     brakeMode();
+    currentlimit();
   }
 
   public void move(double speed){
   intake.set(speed);
+  }
+
+  public void currentlimit(){
+    CurrentLimitsConfigs currentLimits = new CurrentLimitsConfigs();
+    intake.getConfigurator().refresh(currentLimits);
+
+    currentLimits.SupplyCurrentLimit = 50;
+    currentLimits.SupplyCurrentThreshold = 60;
+    currentLimits.SupplyTimeThreshold = 0.1;
+    currentLimits.SupplyCurrentLimitEnable = true;
+    intake.getConfigurator().apply(currentLimits);
   }
 
   public Command intakeAuto1(double speed){

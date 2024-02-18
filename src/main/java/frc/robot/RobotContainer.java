@@ -44,12 +44,8 @@ import frc.robot.subystems.intake;
 import frc.robot.subystems.shooter;
 
 public class RobotContainer {
-  private double MaxSpeed = 3.5; // 4 meters per second desired top speed
-  private double MaxAngularRate = 1.75 * Math.PI; // 1 rotation per second max angular velocity
-
-
-  /* Setting up bindings for necessary control of the swerve drive platform */
-
+  private double MaxSpeed = Constants.kSpeedAt12VoltsMps;
+  private double MaxAngularRate = 2 * Math.PI;
   
 
                               /* Joysticks */
@@ -71,7 +67,9 @@ public class RobotContainer {
   private final JoystickButton dr_R2 = new JoystickButton(driver, ControllerConstants.b_R2);
 
   private final POVButton dr_0 = new POVButton(driver, 0);
+  private final POVButton dr_90 = new POVButton(driver, 90);
   private final POVButton dr_180 = new POVButton(driver, 180);
+  private final POVButton dr_270 = new POVButton(driver, 270);
 
 
                               /*Operator Buttons */
@@ -93,13 +91,26 @@ public class RobotContainer {
   private final intake intakeSub = new intake();
 
   SendableChooser<Command> chooser = new SendableChooser<>();
-  private boolean robotCentric = false;
 
  
   private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
-      .withDeadband(MaxSpeed * 0.1).withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+      .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                // driving in open loop
+                                                               
+  private final SwerveRequest.RobotCentric robotDrive = new SwerveRequest.RobotCentric()
+      .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15)
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); 
+
+  private final SwerveRequest.FieldCentricFacingAngle angleDrive = new SwerveRequest.FieldCentricFacingAngle()
+      .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15)
+      .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
+      .withTargetDirection(Rotation2d.fromDegrees(180));
+  
+  private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
+  .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
+      
+ 
 
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
@@ -113,37 +124,32 @@ public class RobotContainer {
             .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
         ));
 
-    dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
+    // dr_90.whileTrue(drivetrain.applyRequest(() -> robotDrive.withVelocityX(-driver.getLeftY() * MaxSpeed)                               
+    //         .withVelocityY(-driver.getLeftX() * MaxSpeed)
+    //         .withRotationalRate(-driver.getRightX() * MaxAngularRate)));
+    
+    dr_180.onTrue(drivetrain.applyRequest(() -> angleDrive.withVelocityX(-driver.getLeftY() * MaxSpeed)                               
+            .withVelocityY(-driver.getLeftX() * MaxSpeed)));
 
-  // dr_x.whileTrue(drivetrain
-  //       .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
-    dr_o.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
+    dr_270.whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(-driver.getLeftY() * MaxSpeed)                               
+            .withVelocityY(-driver.getLeftX() * MaxSpeed)));
+
+
+    dr_0.toggleOnTrue(drivetrain.getDefaultCommand());
+  
+
+    dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
+    dr_x.whileTrue(drivetrain
+        .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
+    dr_o.onTrue(drivetrain.runOnce(() -> drivetrain.zeroGyro()));
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
 
                                         /*Driver Commands*/
-        // dr_R2.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
-        // dr_R1.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
-        // dr_R1.whileTrue(new ShooterCommand(-0.2, shooterSub));
-
-                                        /*Sysid Commands*/
-
-        dr_x.and(dr_0).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
-        dr_x.and(dr_180).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
-    
-        dr_o.and(dr_0).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
-        dr_o.and(dr_180).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
-    
-        dr_sqr.and(dr_0).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
-        dr_sqr.and(dr_180).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
-    
-        dr_tri.and(dr_0).whileTrue(drivetrain.runSteerDynamTest(Direction.kForward));
-        dr_tri.and(dr_180).whileTrue(drivetrain.runSteerDynamTest(Direction.kReverse));
-
-
-
-
+        dr_R2.whileTrue(new IntakeCommand(IntakeConstants.intakeSpd, intakeSub));
+        dr_R1.whileTrue(new IntakeCommand(-IntakeConstants.intakeSpd, intakeSub));
+        dr_R1.whileTrue(new ShooterCommand(-0.2, shooterSub));
 
 
                                         /*Operator Commands*/
@@ -160,32 +166,54 @@ public class RobotContainer {
 
         // photonCommandButton.onTrue(new PhotonCommand(armSub));
 
+           /*Sysid Commands*/
+
+        // dr_x.and(dr_0).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
+        // dr_x.and(dr_180).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
+    
+        // dr_o.and(dr_0).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
+        // dr_o.and(dr_180).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
+    
+        // dr_sqr.and(dr_0).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
+        // dr_sqr.and(dr_180).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
+    
+        // dr_tri.and(dr_0).whileTrue(drivetrain.runSteerDynamTest(Direction.kForward));
+        // dr_tri.and(dr_180).whileTrue(drivetrain.runSteerDynamTest(Direction.kReverse));
+
 
 
   }
   
 
   public RobotContainer() {
-    NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.7).withTimeout(2));
-    NamedCommands.registerCommand("Lower Arm", new ArmPIDCommand(15, armSub));
+    NamedCommands.registerCommand("Lower Arm", new ArmPIDCommand(18, armSub));
+    NamedCommands.registerCommand("Lower Arm Ground", new ArmPIDCommand(-4, armSub));
+    NamedCommands.registerCommand("Raise Arm", new ArmPIDCommand(20, armSub));
+
     NamedCommands.registerCommand("Intake", intakeSub.intakeAuto1(0.5).withTimeout(1));
-    NamedCommands.registerCommand("Lower Arm Ground", new ArmPIDCommand(1, armSub));
+    NamedCommands.registerCommand("Pickup", intakeSub.intakeAuto1(0.2).withTimeout(1.6));
+    NamedCommands.registerCommand("PickupSource", intakeSub.intakeAuto1(0.4).withTimeout(1));
+    NamedCommands.registerCommand("PickupMid", intakeSub.intakeAuto1(0.4).withTimeout(4.5));
+    NamedCommands.registerCommand("PickupAmp", intakeSub.intakeAuto1(0.4).withTimeout(4.5));
+
+    NamedCommands.registerCommand("Intake2", intakeSub.intakeAuto1(0.5).withTimeout(1));
+
+    NamedCommands.registerCommand("Shoot", shooterSub.shootAuto(0.7).withTimeout(1.5));
+    NamedCommands.registerCommand("Shoot2", shooterSub.shootAuto(0.7).withTimeout(1.5));
+
+
+
+
+
     configureBindings();
 
     chooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData(chooser);
-    drivetrain.zeroGyro();
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::zeroGyro));
+    RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::zeroGyro));
   }
 
   public Command getAutonomousCommand() {
     return chooser.getSelected();
-  }
-
-  public Command rumbleSequence(){
-    Command rumbleCommand =  new InstantCommand(() -> driver.setRumble(RumbleType.kBothRumble, 1));
-    Command stopRumbleCommand =  new InstantCommand(() -> driver.setRumble(RumbleType.kBothRumble, 0));
-    return rumbleCommand.andThen(new WaitCommand(0.5)).andThen(stopRumbleCommand);
-   
   }
 }
