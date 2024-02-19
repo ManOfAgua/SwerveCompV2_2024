@@ -9,42 +9,34 @@ import com.ctre.phoenix6.mechanisms.swerve.SwerveRequest;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveModule.DriveRequestType;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathPlannerAuto;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.wpilibj.GenericHID.RumbleType;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.PS5Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.ShooterConstants;
 import frc.robot.commands.ArmPIDCommand;
 import frc.robot.commands.IntakeCommand;
-import frc.robot.commands.IntakePIDCommand;
 import frc.robot.commands.ManualArmCommand;
 import frc.robot.commands.ShooterCommand;
-import frc.robot.subystems.arm;
-import frc.robot.subystems.intake;
-import frc.robot.subystems.shooter;
+import frc.robot.subsystems.arm;
+import frc.robot.subsystems.intake;
+import frc.robot.subsystems.shooter;
 
 public class RobotContainer {
-  private double MaxSpeed = Constants.kSpeedAt12VoltsMps;
+
+  //TODO: INSTALL DRIVER STATION 2024
+  private double MaxSpeed = GeneratedConstants.kSpeedAt12VoltsMps;
   private double MaxAngularRate = 2 * Math.PI;
   
 
@@ -52,7 +44,7 @@ public class RobotContainer {
  private final PS5Controller driver = new PS5Controller(ControllerConstants.driver);
   private final PS5Controller operator = new PS5Controller(ControllerConstants.operator);
   
-  private final CommandSwerveDrivetrain drivetrain = Constants.DriveTrain; // My drivetrain
+  private final CommandSwerveDrivetrain drivetrain = GeneratedConstants.DriveTrain; // My drivetrain
 
 
 
@@ -97,24 +89,10 @@ public class RobotContainer {
       .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15) // Add a 10% deadband
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                // driving in open loop
-                                                               
-  private final SwerveRequest.RobotCentric robotDrive = new SwerveRequest.RobotCentric()
-      .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15)
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage); 
-
-  private final SwerveRequest.FieldCentricFacingAngle angleDrive = new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(MaxSpeed * 0.15).withRotationalDeadband(MaxAngularRate * 0.15)
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage)
-      .withTargetDirection(Rotation2d.fromDegrees(180));
-  
-  private final SwerveRequest.RobotCentric forwardStraight = new SwerveRequest.RobotCentric()
-  .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-      
- 
+                                                              
 
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
-  // private final Telemetry logger = new Telemetry(MaxSpeed);
 
   private void configureBindings() {
         drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
@@ -128,12 +106,6 @@ public class RobotContainer {
     //         .withVelocityY(-driver.getLeftX() * MaxSpeed)
     //         .withRotationalRate(-driver.getRightX() * MaxAngularRate)));
     
-    dr_180.onTrue(drivetrain.applyRequest(() -> angleDrive.withVelocityX(-driver.getLeftY() * MaxSpeed)                               
-            .withVelocityY(-driver.getLeftX() * MaxSpeed)));
-
-    dr_270.whileTrue(drivetrain.applyRequest(() -> forwardStraight.withVelocityX(-driver.getLeftY() * MaxSpeed)                               
-            .withVelocityY(-driver.getLeftX() * MaxSpeed)));
-
 
     dr_0.toggleOnTrue(drivetrain.getDefaultCommand());
   
@@ -141,7 +113,7 @@ public class RobotContainer {
     dr_L2.whileTrue(drivetrain.applyRequest(() -> brake));
     dr_x.whileTrue(drivetrain
         .applyRequest(() -> point.withModuleDirection(new Rotation2d(-driver.getLeftY(), -driver.getLeftX()))));
-    dr_o.onTrue(drivetrain.runOnce(() -> drivetrain.zeroGyro()));
+    dr_o.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldRelative()));
     if (Utils.isSimulation()) {
       drivetrain.seedFieldRelative(new Pose2d(new Translation2d(), Rotation2d.fromDegrees(90)));
     }
@@ -209,8 +181,8 @@ public class RobotContainer {
 
     chooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData(chooser);
-    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::zeroGyro));
-    RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::zeroGyro));
+    RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
+    RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
   }
 
   public Command getAutonomousCommand() {

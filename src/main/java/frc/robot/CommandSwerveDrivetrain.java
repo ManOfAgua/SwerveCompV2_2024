@@ -1,5 +1,6 @@
 package frc.robot;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import javax.swing.text.Position;
@@ -27,9 +28,12 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.Constants.VisionConstants.APRILTAG_CAMERA_NAME;
 
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.Current;
 import edu.wpi.first.units.Measure;
@@ -47,6 +51,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.IDConstants;
 import frc.robot.Util.ModifiedSignalLogger;
 import frc.robot.Util.SwerveVoltageRequest;
+import frc.robot.subsystems.PoseEstimation;
 
 
 
@@ -60,9 +65,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
-        public Pigeon2 gyro;
+    public Pigeon2 gyro;
     private final Field2d m_Field2d = new Field2d();
-    
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency, SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
@@ -89,6 +93,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         gyro.getConfigurator().apply(new Pigeon2Configuration());
         zeroGyro();
 
+
+
+
         if (Utils.isSimulation()) {
             startSimThread();
         }
@@ -106,7 +113,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
             (speeds)->this.setControl(autoRequest.withSpeeds(speeds)), // Consumer of ChassisSpeeds to drive the robot
             new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0),
                                             new PIDConstants(7.7, .00, .92),
-                                            Constants.kSpeedAt12VoltsMps,
+                                            GeneratedConstants.kSpeedAt12VoltsMps,
                                             driveBaseRadius,
                                             new ReplanningConfig()),
             ()-> {
@@ -199,27 +206,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         
     }
 
-    public double flencoderPos(){
-        CANcoder fl = new CANcoder(14);
-        return fl.getPosition().getValueAsDouble();
-    }
-
-    public double frencoderPos(){
-        CANcoder fr = new CANcoder(15);
-        return fr.getPosition().getValueAsDouble();
-    }
-
-    public double blencoderPos(){
-        CANcoder bl = new CANcoder(13);
-        return bl.getPosition().getValueAsDouble();
-    }
-
-    public double brencoderPos(){
-        CANcoder br = new CANcoder(16);
-        return br.getPosition().getValueAsDouble();
-    }
-
-
     // private SwerveVoltageRequest driveVoltageRequest = new SwerveVoltageRequest(true);
 
     // private SysIdRoutine m_driveSysIdRoutine =
@@ -293,10 +279,15 @@ public void periodic(){
     SmartDashboard.putNumber("Y Pose", this.getState().Pose.getY());
     SmartDashboard.putNumber("Rotation Pose", this.getState().Pose.getRotation().getDegrees());
 
-    SmartDashboard.putNumber("fr coder", frencoderPos());
-    SmartDashboard.putNumber("fl coder", flencoderPos());
-    SmartDashboard.putNumber("bl coder", blencoderPos());
-    SmartDashboard.putNumber("br coder", brencoderPos());
+    // SmartDashboard.putNumber("fr coder", frencoderPos());
+    // SmartDashboard.putNumber("fl coder", flencoderPos());
+    // SmartDashboard.putNumber("bl coder", blencoderPos());
+    // SmartDashboard.putNumber("br coder", brencoderPos());
+
+
+    for (int i = 0; i < Modules.length; i++) {
+        SmartDashboard.putNumber("CANCODER ANGLES: " + i, Modules[i].getCANcoder().getAbsolutePosition().getValueAsDouble());
+    }
 
     // SmartDashboard.putNumberArray("Stator Current", stator());
 }
