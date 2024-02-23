@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.FunctionalCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
@@ -16,10 +17,10 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants.IntakeConstants;
 
-public class intake extends SubsystemBase {
+public class Intake extends SubsystemBase {
 public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
 
-  public intake() {
+  public Intake() {
     brakeMode();
     currentlimit();
   }
@@ -39,7 +40,7 @@ public TalonFX intake = new TalonFX(IntakeConstants.intakeID);
     intake.getConfigurator().apply(currentLimits);
   }
 
-  public Command intakeAuto1(double speed){
+  public Command intakeAuto(double speed){
     return run(
       () -> 
       intake.set(speed)

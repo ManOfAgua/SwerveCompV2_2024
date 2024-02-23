@@ -8,20 +8,21 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.subystems.arm;
+import frc.robot.subsystems.Arm;
 
 public class ArmPIDCommand extends Command {
 
-private final arm armSub;
-private final PIDController armPID;
-private final double goal;
-private boolean done;
+  private final Arm armSub;
+  private final PIDController armPID;
+  private final double goal;
+  private boolean done;
 
-  public ArmPIDCommand(double setPoint, arm arm) {
+  public ArmPIDCommand(double setPoint, Arm arm) {
     this.armSub = arm;
     this.goal = setPoint;
     this.armPID = new PIDController(ArmConstants.armKP, ArmConstants.armKI, ArmConstants.armKD);
     
+
     addRequirements(armSub);
   }
 
@@ -34,10 +35,11 @@ private boolean done;
   }
 
   // Called every time the scheduler runs while the command is scheduled.
+
   @Override
   public void execute() {
-        done = armPID.atSetpoint();
-    
+    done = armPID.atSetpoint();
+
     double speed = armPID.calculate(armSub.armTickToDegrees(), goal);
     armSub.move(-speed);
 

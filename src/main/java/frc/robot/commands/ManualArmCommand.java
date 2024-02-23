@@ -6,12 +6,12 @@ package frc.robot.commands;
 
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subystems.arm;
+import frc.robot.subsystems.Arm;
 
 public class ManualArmCommand extends Command {
-private arm armSub;
+private Arm armSub;
 private double speed;
-  public ManualArmCommand(double armSpeed, arm arm) {
+  public ManualArmCommand(double armSpeed, Arm arm) {
     this.armSub = arm;
     this.speed = armSpeed;
     addRequirements(arm);  

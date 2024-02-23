@@ -12,6 +12,7 @@ import javax.swing.plaf.TreeUI;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonUtils;
+import org.photonvision.estimation.VisionEstimation;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -19,39 +20,39 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
+import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.CANSparkBase.SoftLimitDirection;
 
+import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.trajectory.TrajectoryUtil;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.CommandSwerveDrivetrain;
 import frc.robot.Constants.ArmConstants;
-public class arm extends SubsystemBase {      
+public class Arm extends SubsystemBase {      
 
    TalonFX leftArm = new TalonFX(ArmConstants.leftarmID);
    TalonFX rightArm = new TalonFX(ArmConstants.rightarmID);
    PhotonCamera photonCamera = new PhotonCamera("PhotonCamera");
    Follower follower = new Follower(ArmConstants.leftarmID, true);
-   CommandSwerveDrivetrain drivetrain;
+  CommandSwerveDrivetrain m_driveTrain;
+  private final double camera_Height = Units.inchesToMeters(10);
+  private final double target_Height = Units.inchesToMeters(56.125); //Distance from floor to the middle of april tag
+  private AprilTagFieldLayout aprilTagLayout;
 
-  final double camera_Height = Units.inchesToMeters(8);
-  final double target_Height = Units.inchesToMeters(56.125); //Distance from floor to the middle of april tag
-
-  double vertoffSet = Units.inchesToMeters(24.3125); //80.4375 height of middle of speaker opening.. 80.4375-56.125=24.3125
+  private final double vertoffSet = Units.inchesToMeters(24.3125); //80.4375 height of middle of speaker opening.. 80.4375-56.125=24.3125
 
 
-  public arm() {
+  public Arm(CommandSwerveDrivetrain driveTrain) {
     brakeMode();
     currentlimit();
+    this.m_driveTrain = driveTrain;
     rightArm.setControl(follower);
-
+    this.aprilTagLayout = AprilTagFields.k2024Crescendo.loadAprilTagLayoutField();
   }
 
   public void move(double speed){
@@ -88,43 +89,33 @@ public class arm extends SubsystemBase {
     rightArm.setNeutralMode(NeutralModeValue.Brake);
   }
 
-  public double leftmotorTemp(){
-   double armTemp = leftArm.getDeviceTemp().getValueAsDouble();
-   return armTemp;
-
-  }
-
-
-  public double calculateAngle(){      
-    var result = photonCamera.getLatestResult();
-    PhotonTrackedTarget target = result.getBestTarget();
-    if(target == null){
-      return armTickToDegrees();
-    }
-    else{
-    int targetID = target.getFiducialId();
-        if(targetID==7||targetID==4){
-          double horizontal = PhotonUtils.getDistanceToPose(drivetrain.getState().Pose, 
-          AprilTagFields.k2024Crescendo.loadAprilTagLayoutField().getTagPose(targetID).get().toPose2d());
-
-            double angle = Math.atan(((target_Height-camera_Height)+(vertoffSet))/(horizontal));
-            return angle;
-        }
-        else{
-          return armTickToDegrees();
-        }
-    }
-  }
-
+  // public double calculateAngle(){      
+  //   var result = photonCamera.getLatestResult();
+  //   PhotonTrackedTarget target = result.getBestTarget();
+  //   if(target == null){
+  //     return armTickToDegrees();
+  //   }
+  //   else{
+  //   int targetID = target.getFiducialId();
+  //       if(targetID==7||targetID==4){          
+  //         double horizontal = PhotonUtils.getDistanceToPose(m_driveTrain.getState().Pose,
+  //         aprilTagLayout.getTagPose(targetID).get().toPose2d());
+          
+  //           double angle = Math.atan(((target_Height-camera_Height)+(vertoffSet))/(horizontal));
+  //           return angle;
+  //       }
+  //       else{
+  //         System.out.println("\n\n\n Test if return this else \n\n\n\n");
+  //         return armTickToDegrees();
+  //       }
+  //   }
+  // }
 
   @Override
   public void periodic() {
 
 
     SmartDashboard.putNumber("Arm Angle", armTickToDegrees());
-    SmartDashboard.putNumber("Left Arm Temp", leftmotorTemp());
-
-    // SmartDashboard.putNumber("Photon", calculateAngle());
     // SmartDashboard.putNumber("Photon Angle", calculateAngle());
 
     //Test 1: -121.3916015625

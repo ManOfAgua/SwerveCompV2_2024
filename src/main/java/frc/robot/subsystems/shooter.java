@@ -13,14 +13,14 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
 
-public class shooter extends SubsystemBase {
+public class Shooter extends SubsystemBase {
 TalonFX shooterTop = new TalonFX(ShooterConstants.shooterTopID);
 TalonFX shooterBtm = new TalonFX(ShooterConstants.shooterBtmID);
 
 Follower follower = new Follower(ShooterConstants.shooterTopID, false);
 public boolean robotCentric;
 
-  public shooter() {
+  public Shooter() {
     coastMode();
     currentlimit();
     shooterTop.setInverted(true);
@@ -36,8 +36,8 @@ public boolean robotCentric;
     shooterTop.getConfigurator().refresh(currentLimits);
     shooterBtm.getConfigurator().refresh(currentLimits);
 
-    currentLimits.SupplyCurrentLimit = 50;
-    currentLimits.SupplyCurrentThreshold = 60;
+    currentLimits.SupplyCurrentLimit = 40;
+    currentLimits.SupplyCurrentThreshold = 50;
     currentLimits.SupplyTimeThreshold = 0.1;
     currentLimits.SupplyCurrentLimitEnable = true;
     shooterTop.getConfigurator().apply(currentLimits);
