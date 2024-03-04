@@ -2,10 +2,10 @@
   "version": 1.0,
   "startingPose": {
     "position": {
-      "x": 0.75,
-      "y": 4.54
+      "x": 1.28,
+      "y": 5.55
     },
-    "rotation": -60.0
+    "rotation": 0
   },
   "command": {
     "type": "sequential",
@@ -18,25 +18,13 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "Lower Arm"
-          }
-        },
-        {
           "type": "parallel",
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "path",
                 "data": {
-                  "name": "Shoot"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": "Intake"
+                  "pathName": "SpeakerMid1"
                 }
               }
             ]
@@ -49,7 +37,7 @@
               {
                 "type": "path",
                 "data": {
-                  "pathName": "LeaveSource"
+                  "pathName": "SpeakerMid2"
                 }
               }
             ]

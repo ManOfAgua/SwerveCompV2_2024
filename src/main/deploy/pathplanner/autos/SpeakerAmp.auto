@@ -47,24 +47,12 @@
           "data": {
             "commands": [
               {
-                "type": "named",
-                "data": {
-                  "name": "Lower Arm Ground"
-                }
-              },
-              {
                 "type": "path",
                 "data": {
                   "pathName": "Amp1"
                 }
               }
             ]
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "PickupAmp"
           }
         }
       ]

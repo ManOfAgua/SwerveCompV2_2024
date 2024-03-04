@@ -4,7 +4,11 @@
 
 package frc.robot.commands;
 
+import com.ctre.phoenix6.configs.Slot0Configs;
+
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ArmConstants;
@@ -41,6 +45,7 @@ public class ArmPIDCommand extends Command {
     done = armPID.atSetpoint();
 
     double speed = armPID.calculate(armSub.armTickToDegrees(), goal);
+
     armSub.move(-speed);
 
     SmartDashboard.putBoolean("Arm Tolerance Check", armPID.atSetpoint());

@@ -40,9 +40,8 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.IDConstants;
-import frc.robot.Constants.VisionConstants;
+import frc.robot.Util.SwerveVoltageRequest;
 // import frc.robot.subsystems.PhotonRunnable;
-import frc.robot.subsystems.PhotonRunnable;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
@@ -58,16 +57,17 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     public Pigeon2 gyro;
     private SwerveDrivePoseEstimator poseEstimator;
     private Field2d field2d = new Field2d();
-    private PhotonRunnable photonEstimator = new PhotonRunnable();
+    // private PhotonRunnable photonEstimator = new PhotonRunnable();
     private Supplier<Rotation2d> rotationSupplier;
     private Supplier<SwerveModulePosition[]> modulePositionSupplier;
     private OriginPosition originPosition = kBlueAllianceWallRightSide;
     private boolean sawTag = false;
 
+
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency,
             SwerveModuleConstants... modules) {
         super(driveTrainConstants, OdometryUpdateFrequency, modules);
-        coastMode();
+        configNeutralMode(NeutralModeValue.Coast);
         configurePathPlanner();
         driveLimit();
         azimuthLimit();
@@ -82,7 +82,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, SwerveModuleConstants... modules) {
         super(driveTrainConstants, modules);
-        coastMode();
+        configNeutralMode(NeutralModeValue.Coast);
         configurePathPlanner();
         driveLimit();
         azimuthLimit();
@@ -96,7 +96,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     }
 
     private void configurePathPlanner() {
-        double driveBaseRadius = 16.08;
+        double driveBaseRadius = 0;
         for (var moduleLocation : m_moduleLocations) {
             driveBaseRadius = Math.max(driveBaseRadius, moduleLocation.getNorm());
         }
@@ -107,8 +107,9 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
                 this::getCurrentRobotChassisSpeeds,
                 (speeds) -> this.setControl(autoRequest.withSpeeds(speeds)), // Consumer of ChassisSpeeds to drive the
                                                                              // robot
-                new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0),
-                        new PIDConstants(7.7, .00, .92),
+                new HolonomicPathFollowerConfig(
+                    new PIDConstants(5, 0, 0),
+                    new PIDConstants(7.7, 0.01, 0.8),  // .0069  //3.1, 0.01, 0.0039
                         GeneratedConstants.kSpeedAt12VoltsMps,
                         driveBaseRadius,
                         new ReplanningConfig()),
@@ -188,6 +189,10 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         return gyro.getAngle();
     }
 
+    public double getGyroYaw() {
+        return gyro.getYaw().getValueAsDouble();
+    }
+
     public Rotation2d getGyroRotation() {
         return gyro.getRotation2d();
     }
@@ -198,15 +203,8 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
 
     public void zeroGyro() {
         gyro.setYaw(0);
-        System.out.println("Gyro Zero");
-    }
-
-    public void coastMode() {
-        for (var swerveModule : Modules) {
-            TalonFX driveMotor = swerveModule.getSteerMotor();
-            driveMotor.setNeutralMode(NeutralModeValue.Coast);
-        }
-
+        // gyro.setYaw(0, .135);
+        System.out.printf("Gyro ZeroD", + gyro.getYaw().getValueAsDouble());
     }
 
     private boolean m_hasReseeded = false;
@@ -293,27 +291,31 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     // }
     // return currents;
     // }
-
     @Override
     public void periodic() {
-        var visionPose = photonEstimator.grabLatestEstimatedPose();
-        if (visionPose != null) {
-            // New pose from vision
-            sawTag = true;
-            var pose2d = visionPose.estimatedPose.toPose2d();
+        // var visionPose = photonEstimator.grabLatestEstimatedPose();
+        // if (visionPose != null) {
+        //     // New pose from vision
+        //     sawTag = true;
+        //     var pose2d = visionPose.estimatedPose.toPose2d();
   
-            this.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
-        }
+        //     this.addVisionMeasurement(pose2d, visionPose.timestampSeconds);
+        // }
 
-        SmartDashboard.putNumber("Heading", getgyroAngle());
+        SmartDashboard.putNumber("Gyro Angle", getgyroAngle());
         SmartDashboard.putNumber("X Pose", this.getState().Pose.getX());
         SmartDashboard.putNumber("Y Pose", this.getState().Pose.getY());
         SmartDashboard.putNumber("Rotation Pose", this.getState().Pose.getRotation().getDegrees());
+        
+        // check if gyro is changing once tele-op is enabled
+        SmartDashboard.putNumber("Gyro Yaw", getGyroYaw());
+
+
+
 
         for (int i = 0; i < Modules.length; i++) {
             SmartDashboard.putNumber("CANCODER ANGLES: " + i,
                     Modules[i].getCANcoder().getAbsolutePosition().getValueAsDouble());
         }
     }
-
 }

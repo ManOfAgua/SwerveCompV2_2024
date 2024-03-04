@@ -90,7 +90,7 @@ public class GeneratedConstants { //TODO: Tune it
     private static final int kFrontLeftDriveMotorId = 3;
     private static final int kFrontLeftSteerMotorId = 2;
     private static final int kFrontLeftEncoderId = 14;
-    private static final double kFrontLeftEncoderOffset = 0.239501953125;
+    private static final double kFrontLeftEncoderOffset = 0.234375;
 
     private static final double kFrontLeftXPosInches = 11.375;
     private static final double kFrontLeftYPosInches = 11.375;
@@ -99,7 +99,7 @@ public class GeneratedConstants { //TODO: Tune it
     private static final int kFrontRightDriveMotorId = 4;
     private static final int kFrontRightSteerMotorId = 5;
     private static final int kFrontRightEncoderId = 15;
-    private static final double kFrontRightEncoderOffset = -0.33056640625;
+    private static final double kFrontRightEncoderOffset = -0.32958984375; //-0.33056640625 
 
     private static final double kFrontRightXPosInches = 11.375;
     private static final double kFrontRightYPosInches = -11.375;
@@ -108,7 +108,8 @@ public class GeneratedConstants { //TODO: Tune it
     private static final int kBackLeftDriveMotorId = 1;
     private static final int kBackLeftSteerMotorId = 0;
     private static final int kBackLeftEncoderId = 13;
-    private static final double kBackLeftEncoderOffset = 0.263916015625;
+
+    private static final double kBackLeftEncoderOffset = 0.265380859375; //0.263916015625 265380859375
 
     private static final double kBackLeftXPosInches = -11.375;
     private static final double kBackLeftYPosInches = 11.375;
@@ -117,7 +118,7 @@ public class GeneratedConstants { //TODO: Tune it
     private static final int kBackRightDriveMotorId = 6;
     private static final int kBackRightSteerMotorId = 7;
     private static final int kBackRightEncoderId = 16;
-    private static final double kBackRightEncoderOffset = -0.197998046875;
+    private static final double kBackRightEncoderOffset = -0.19775390625;
 
     private static final double kBackRightXPosInches = -11.375;
     private static final double kBackRightYPosInches = -11.375;

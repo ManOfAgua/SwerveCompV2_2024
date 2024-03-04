@@ -53,15 +53,15 @@ public class RobotContainer {
   private final PS5Controller driver = new PS5Controller(ControllerConstants.driver);
   private final PS5Controller operator = new PS5Controller(ControllerConstants.operator);
 
-  private final CommandSwerveDrivetrain drivetrain = GeneratedConstants.DriveTrain; // My drivetrain
+  CommandSwerveDrivetrain drivetrain = GeneratedConstants.DriveTrain; // My drivetrain
 
   /* Driver Buttons */
   private final JoystickButton dr_sqr = new JoystickButton(driver, ControllerConstants.b_SQR);
   private final JoystickButton pointButton = new JoystickButton(driver, ControllerConstants.b_X);
   private final JoystickButton brakeButton = new JoystickButton(driver, ControllerConstants.b_L2);
   private final JoystickButton dr_o = new JoystickButton(driver, ControllerConstants.b_O);
-  private final JoystickButton reseedButton = new JoystickButton(driver, ControllerConstants.b_TRI);
-  private final JoystickButton dr_L1 = new JoystickButton(driver, ControllerConstants.b_L1);
+  private final JoystickButton dr_tri = new JoystickButton(driver, ControllerConstants.b_TRI);
+  private final JoystickButton reseedButton = new JoystickButton(driver, ControllerConstants.b_L1);
   private final JoystickButton revintakeButton = new JoystickButton(driver, ControllerConstants.b_R1);
   private final JoystickButton intakeButton = new JoystickButton(driver, ControllerConstants.b_R2);
 
@@ -101,29 +101,37 @@ public class RobotContainer {
 
   // private final Telemetry logger = new Telemetry(MaxSpeed);
 
-  PhoenixPIDController anglePID = new PhoenixPIDController(AngleConstants.kP, AngleConstants.kI, AngleConstants.kD);
+  // PhoenixPIDController anglePID = new PhoenixPIDController(AngleConstants.kP, AngleConstants.kI, AngleConstants.kD);
 
   private void configureBindings() {
     // drivetrain.registerTelemetry(logger::telemeterize);
 
-    angleDrive.HeadingController = anglePID;
-    drivetrain.setDefaultCommand(
-        drivetrain.applyRequest(
-            () -> {
-              if (Math.abs(driver.getRightX()) > 0.15) {
-                drivetrain.disableHoldHeading();
 
-                return drive.withVelocityX(-driver.getLeftY() * MaxSpeed)
-                    .withVelocityY(-driver.getLeftX() * MaxSpeed)
-                    .withRotationalRate(-driver.getRightX() * MaxAngularRate);
-              } else {
-                drivetrain.enableHoldHeading();
+    // angleDrive.HeadingController = anglePID;
+    // drivetrain.setDefaultCommand(
+    //     drivetrain.applyRequest(
+    //         () -> {
+    //           if (Math.abs(driver.getRightX()) > 0.15) {
+    //             drivetrain.disableHoldHeading();
 
-                return angleDrive.withVelocityX(-driver.getLeftY() * MaxSpeed)
-                    .withVelocityY(-driver.getLeftX() * MaxSpeed)
-                    .withTargetDirection(drivetrain.getHoldHeading());
-              }
-            }).finallyDo(drivetrain::disableHoldHeading));
+    //             return drive.withVelocityX(-driver.getLeftY() * MaxSpeed)
+    //                 .withVelocityY(-driver.getLeftX() * MaxSpeed)
+    //                 .withRotationalRate(-driver.getRightX() * MaxAngularRate);
+    //           } else {
+    //             drivetrain.enableHoldHeading();
+
+    //             return angleDrive.withVelocityX(-driver.getLeftY() * MaxSpeed)
+    //                 .withVelocityY(-driver.getLeftX() * MaxSpeed)
+    //                 .withTargetDirection(drivetrain.getHoldHeading());
+    //           }
+    //         }).finallyDo(drivetrain::disableHoldHeading));
+                    /*Worst Case */
+            drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
+            drivetrain.applyRequest(() -> drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive forward with
+                                                                                               // negative Y (forward)
+                .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+            ));
 
     brakeButton.whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -144,16 +152,16 @@ public class RobotContainer {
     armFwdButton.whileTrue(new ManualArmCommand(ArmConstants.armSpd, armSub));
     armBckButton.whileTrue(new ManualArmCommand(-ArmConstants.armSpd, armSub));
 
-    armspeakerCloseButton.onTrue(new ArmPIDCommand(20, armSub));
+    armspeakerCloseButton.onTrue(new ArmPIDCommand(25, armSub));
 
     // photonCommandButton.onTrue(new PhotonCommand(armSub));
 
     /* Sysid Commands */
-    // dr_x.and(dr_0).whileTrue(drivetrain.runDriveQuasiTest(Direction.kForward));
-    // dr_x.and(dr_180).whileTrue(drivetrain.runDriveQuasiTest(Direction.kReverse));
+    // pointButton.and(dr_0).whileTrue(armSub.runArmQuasiTest(Direction.kForward));
+    // pointButton.and(dr_180).whileTrue(armSub.runArmQuasiTest(Direction.kReverse));
 
-    // dr_o.and(dr_0).whileTrue(drivetrain.runDriveDynamTest(Direction.kForward));
-    // dr_o.and(dr_180).whileTrue(drivetrain.runDriveDynamTest(Direction.kReverse));
+    // dr_o.and(dr_0).whileTrue(armSub.runArmDynamTest(Direction.kForward));
+    // dr_o.and(dr_180).whileTrue(armSub.runArmDynamTest(Direction.kReverse));
 
     // dr_sqr.and(dr_0).whileTrue(drivetrain.runSteerQuasiTest(Direction.kForward));
     // dr_sqr.and(dr_180).whileTrue(drivetrain.runSteerQuasiTest(Direction.kReverse));
@@ -163,9 +171,9 @@ public class RobotContainer {
   }
 
   public RobotContainer() {
-    NamedCommands.registerCommand("Lower Arm", new ArmPIDCommand(18, armSub));
-    NamedCommands.registerCommand("Lower Arm Ground", new ArmPIDCommand(-4, armSub));
-    NamedCommands.registerCommand("Raise Arm", new ArmPIDCommand(20, armSub));
+    NamedCommands.registerCommand("Lower Arm", new ArmPIDCommand(25, armSub));
+    NamedCommands.registerCommand("Lower Arm Ground", new ArmPIDCommand(6, armSub));
+    NamedCommands.registerCommand("Raise Arm", new ArmPIDCommand(25, armSub));
 
     NamedCommands.registerCommand("Intake", intakeSub.intakeAuto(0.5).withTimeout(1));
     NamedCommands.registerCommand("Pickup", intakeSub.intakeAuto(0.2).withTimeout(1.6));
@@ -184,7 +192,19 @@ public class RobotContainer {
     chooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData(chooser);
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
+    
+
+
+    RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
+    RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::zeroGyro));
+
   }
+
+  // public void resetPID(){
+  //     angleDrive.HeadingController.reset();
+  //     angleDrive.HeadingController = anglePID;
+  //     System.out.println("CHANGED");
+  // }
 
   // private void configureDashboard() {
   //   /**** Driver tab ****/

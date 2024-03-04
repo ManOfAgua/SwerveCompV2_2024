@@ -19,6 +19,7 @@ import org.photonvision.targeting.PhotonTrackedTarget;
 import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.SoftwareLimitSwitchConfigs;
 import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrain;
 import com.ctre.phoenix6.mechanisms.swerve.SwerveDrivetrainConstants;
@@ -28,16 +29,23 @@ import com.revrobotics.CANSparkBase.SoftLimitDirection;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.Measure;
+import edu.wpi.first.units.Unit;
+import edu.wpi.first.units.Voltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.CommandSwerveDrivetrain;
+import frc.robot.Telemetry;
+import frc.robot.Util.ModifiedSignalLogger;
+import frc.robot.Util.SwerveVoltageRequest;
 import frc.robot.Constants.ArmConstants;
 public class Arm extends SubsystemBase {      
 
    TalonFX leftArm = new TalonFX(ArmConstants.leftarmID);
    TalonFX rightArm = new TalonFX(ArmConstants.rightarmID);
-   PhotonCamera photonCamera = new PhotonCamera("PhotonCamera");
+  //  PhotonCamera photonCamera = new PhotonCamera("PhotonCamera");
    Follower follower = new Follower(ArmConstants.leftarmID, true);
   CommandSwerveDrivetrain m_driveTrain;
   private final double camera_Height = Units.inchesToMeters(10);
@@ -45,7 +53,7 @@ public class Arm extends SubsystemBase {
   private AprilTagFieldLayout aprilTagLayout;
 
   private final double vertoffSet = Units.inchesToMeters(24.3125); //80.4375 height of middle of speaker opening.. 80.4375-56.125=24.3125
-
+  private Voltage volts2;
 
   public Arm(CommandSwerveDrivetrain driveTrain) {
     brakeMode();
@@ -76,7 +84,7 @@ public class Arm extends SubsystemBase {
     double motorRotations = leftArm.getPosition().getValueAsDouble() / (ArmConstants.kCountsPerRev * ArmConstants.kArmGearRatio);
     double armTicksPerDegree = motorRotations * ArmConstants.kArmScaleFactor;
     double offset = 90;
-  return -armTicksPerDegree+offset;
+    return -armTicksPerDegree+offset;
    }
 
   private void resetEncoders(){
@@ -110,6 +118,24 @@ public class Arm extends SubsystemBase {
   //       }
   //   }
   // }
+    // private SysIdRoutine m_armSysIdRoutine =
+    // new SysIdRoutine(
+    // new SysIdRoutine.Config(null, null, null,
+    // ModifiedSignalLogger.logState()),
+    // new SysIdRoutine.Mechanism(
+    // (Measure<Voltage> volts) ->
+    // leftArm.setVoltage(volts.in(volts2)),  
+    // null,
+    // this));
+
+    //   public Command runArmQuasiTest(SysIdRoutine.Direction direction)
+    // {
+    // return m_armSysIdRoutine.quasistatic(direction);
+    // }
+
+    // public Command runArmDynamTest(SysIdRoutine.Direction direction) {
+    // return m_armSysIdRoutine.dynamic(direction);
+    // }
 
   @Override
   public void periodic() {
