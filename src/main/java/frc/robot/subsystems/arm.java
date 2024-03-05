@@ -45,7 +45,7 @@ public class Arm extends SubsystemBase {
 
    TalonFX leftArm = new TalonFX(ArmConstants.leftarmID);
    TalonFX rightArm = new TalonFX(ArmConstants.rightarmID);
-  //  PhotonCamera photonCamera = new PhotonCamera("PhotonCamera");
+   PhotonCamera photonCamera = new PhotonCamera("PhotonCamera");
    Follower follower = new Follower(ArmConstants.leftarmID, true);
   CommandSwerveDrivetrain m_driveTrain;
   private final double camera_Height = Units.inchesToMeters(10);
@@ -97,27 +97,29 @@ public class Arm extends SubsystemBase {
     rightArm.setNeutralMode(NeutralModeValue.Brake);
   }
 
-  // public double calculateAngle(){      
-  //   var result = photonCamera.getLatestResult();
-  //   PhotonTrackedTarget target = result.getBestTarget();
-  //   if(target == null){
-  //     return armTickToDegrees();
-  //   }
-  //   else{
-  //   int targetID = target.getFiducialId();
-  //       if(targetID==7||targetID==4){          
-  //         double horizontal = PhotonUtils.getDistanceToPose(m_driveTrain.getState().Pose,
-  //         aprilTagLayout.getTagPose(targetID).get().toPose2d());
+  public double calculateAngle(){      
+    var result = photonCamera.getLatestResult();
+    PhotonTrackedTarget target = result.getBestTarget();
+    if(target == null){
+      return armTickToDegrees();
+    }
+    else{
+    int targetID = target.getFiducialId();
+        if(targetID==7||targetID==4){          
+          double horizontal = PhotonUtils.getDistanceToPose(m_driveTrain.getState().Pose,
+          aprilTagLayout.getTagPose(targetID).get().toPose2d());
           
-  //           double angle = Math.atan(((target_Height-camera_Height)+(vertoffSet))/(horizontal));
-  //           return angle;
-  //       }
-  //       else{
-  //         System.out.println("\n\n\n Test if return this else \n\n\n\n");
-  //         return armTickToDegrees();
-  //       }
-  //   }
-  // }
+            double angle = Math.atan(((target_Height-camera_Height)+(vertoffSet))/(horizontal));
+            return angle;
+        }
+        else{
+          System.out.println("\n\n\n Test if return this else \n\n\n\n");
+          return armTickToDegrees();
+        }
+    }
+  }
+
+
     // private SysIdRoutine m_armSysIdRoutine =
     // new SysIdRoutine(
     // new SysIdRoutine.Config(null, null, null,

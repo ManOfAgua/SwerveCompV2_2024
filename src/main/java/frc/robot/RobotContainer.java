@@ -31,7 +31,6 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Constants.AngleConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.IntakeConstants;
@@ -78,7 +77,7 @@ public class RobotContainer {
   private final JoystickButton shootSlowButton = new JoystickButton(operator, ControllerConstants.b_SQR);
 
   private final POVButton armAmpButton = new POVButton(operator, 180);
-  private final POVButton photonCommandButton = new POVButton(operator, 90); // TODO: Choose Button
+  private final POVButton photonCommandButton = new POVButton(operator, 90);
 
   /* Subsystems */
   private final Arm armSub = new Arm(drivetrain);
@@ -92,46 +91,42 @@ public class RobotContainer {
       .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // I want field-centric
                                                                // driving in open loop
 
-  private final SwerveRequest.FieldCentricFacingAngle angleDrive = new SwerveRequest.FieldCentricFacingAngle()
-      .withDeadband(MaxSpeed * 0.15)
-      .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-
   private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
   private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
   // private final Telemetry logger = new Telemetry(MaxSpeed);
 
-  // PhoenixPIDController anglePID = new PhoenixPIDController(AngleConstants.kP, AngleConstants.kI, AngleConstants.kD);
+  // PhoenixPIDController anglePID = new PhoenixPIDController(AngleConstants.kP,
+  // AngleConstants.kI, AngleConstants.kD);
 
   private void configureBindings() {
     // drivetrain.registerTelemetry(logger::telemeterize);
 
+                                                                    // angleDrive.HeadingController = anglePID;
+                                                                    // drivetrain.setDefaultCommand(
+                                                                    // drivetrain.applyRequest(
+                                                                    // () -> {
+                                                                    // if (Math.abs(driver.getRightX()) > 0.15) {
+                                                                    // drivetrain.disableHoldHeading();
 
-    // angleDrive.HeadingController = anglePID;
-    // drivetrain.setDefaultCommand(
-    //     drivetrain.applyRequest(
-    //         () -> {
-    //           if (Math.abs(driver.getRightX()) > 0.15) {
-    //             drivetrain.disableHoldHeading();
+                                                                    // return drive.withVelocityX(-driver.getLeftY() * MaxSpeed)
+                                                                    // .withVelocityY(-driver.getLeftX() * MaxSpeed)
+                                                                    // .withRotationalRate(-driver.getRightX() * MaxAngularRate);
+                                                                    // } else {
+                                                                    // drivetrain.enableHoldHeading();
 
-    //             return drive.withVelocityX(-driver.getLeftY() * MaxSpeed)
-    //                 .withVelocityY(-driver.getLeftX() * MaxSpeed)
-    //                 .withRotationalRate(-driver.getRightX() * MaxAngularRate);
-    //           } else {
-    //             drivetrain.enableHoldHeading();
-
-    //             return angleDrive.withVelocityX(-driver.getLeftY() * MaxSpeed)
-    //                 .withVelocityY(-driver.getLeftX() * MaxSpeed)
-    //                 .withTargetDirection(drivetrain.getHoldHeading());
-    //           }
-    //         }).finallyDo(drivetrain::disableHoldHeading));
-                    /*Worst Case */
-            drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
-            drivetrain.applyRequest(() -> drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive forward with
-                                                                                               // negative Y (forward)
-                .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
-                .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
-            ));
+                                                                    // return angleDrive.withVelocityX(-driver.getLeftY() * MaxSpeed)
+                                                                    // .withVelocityY(-driver.getLeftX() * MaxSpeed)
+                                                                    // .withTargetDirection(drivetrain.getHoldHeading());
+                                                                    // }
+                                                                    // }).finallyDo(drivetrain::disableHoldHeading));
+    /* Worst Case */
+    drivetrain.setDefaultCommand( // Drivetrain will execute this command periodically
+        drivetrain.applyRequest(() -> drive.withVelocityX(-driver.getLeftY() * MaxSpeed) // Drive forward with
+                                                                                         // negative Y (forward)
+            .withVelocityY(-driver.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+            .withRotationalRate(-driver.getRightX() * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        ));
 
     brakeButton.whileTrue(drivetrain.applyRequest(() -> brake));
 
@@ -153,8 +148,6 @@ public class RobotContainer {
     armBckButton.whileTrue(new ManualArmCommand(-ArmConstants.armSpd, armSub));
 
     armspeakerCloseButton.onTrue(new ArmPIDCommand(25, armSub));
-
-    // photonCommandButton.onTrue(new PhotonCommand(armSub));
 
     /* Sysid Commands */
     // pointButton.and(dr_0).whileTrue(armSub.runArmQuasiTest(Direction.kForward));
@@ -192,28 +185,11 @@ public class RobotContainer {
     chooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData(chooser);
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
-    
-
 
     RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::seedFieldRelative));
     RobotModeTriggers.teleop().onTrue(Commands.runOnce(drivetrain::zeroGyro));
 
   }
-
-  // public void resetPID(){
-  //     angleDrive.HeadingController.reset();
-  //     angleDrive.HeadingController = anglePID;
-  //     System.out.println("CHANGED");
-  // }
-
-  // private void configureDashboard() {
-  //   /**** Driver tab ****/
-  //   var driverTab = Shuffleboard.getTab("Driver");
-  //   driverTab.add(new HttpCamera("PhotonCamera", "http://photonvision.local:5800/"))
-  //       .withWidget(BuiltInWidgets.kCameraStream)
-  //       .withProperties(Map.of("showCrosshair", true, "showControls", false, "rotation", "QUARTER_CCW"))
-  //       .withSize(4, 6).withPosition(0, 0);
-  // }
 
   public Command getAutonomousCommand() {
     return chooser.getSelected();

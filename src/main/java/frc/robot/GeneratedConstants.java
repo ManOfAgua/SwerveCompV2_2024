@@ -99,7 +99,7 @@ public class GeneratedConstants { //TODO: Tune it
     private static final int kFrontRightDriveMotorId = 4;
     private static final int kFrontRightSteerMotorId = 5;
     private static final int kFrontRightEncoderId = 15;
-    private static final double kFrontRightEncoderOffset = -0.32958984375; //-0.33056640625 
+    private static final double kFrontRightEncoderOffset = -0.32958984375;
 
     private static final double kFrontRightXPosInches = 11.375;
     private static final double kFrontRightYPosInches = -11.375;
