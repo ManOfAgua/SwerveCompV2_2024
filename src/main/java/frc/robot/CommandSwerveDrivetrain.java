@@ -44,10 +44,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import frc.robot.Constants.IDConstants;
 import frc.robot.Util.SwerveVoltageRequest;
 import frc.robot.Util.VisionHelpers.TimestampedVisionUpdate;
-// import frc.robot.subsystems.PhotonRunnable;
-import frc.robot.subsystems.Vision.AprilTagVision;
-import frc.robot.subsystems.Vision.AprilTagVisionIOPhotonVision;
-import frc.robot.subsystems.Vision.AprilTagVisionIOPhotonVisionSIM;
+import frc.robot.subsystems.Vision.PhotonVisionRunnable;
 
 /**
  * Class that extends the Phoenix SwerveDrivetrain class and implements
@@ -61,9 +58,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     private final SwerveRequest.ApplyChassisSpeeds autoRequest = new SwerveRequest.ApplyChassisSpeeds();
     public Pigeon2 gyro;
     private Field2d field = new Field2d();
-    private AprilTagVision aprilTagVision;
-    private CommandSwerveDrivetrain drivetrain = GeneratedConstants.DriveTrain;
-    private Pose2d estimatedPose;
+    private PhotonVisionRunnable m_PhotonRunnable = new PhotonVisionRunnable();
 
     public CommandSwerveDrivetrain(SwerveDrivetrainConstants driveTrainConstants, double OdometryUpdateFrequency,
             SwerveModuleConstants... modules) {
@@ -161,17 +156,6 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
         public void addDashboardWidgets(ShuffleboardTab tab) {
         tab.add("Field", field).withPosition(0, 0).withSize(6, 4);
         tab.addString("Pose", this::getFomattedPose).withPosition(6, 2).withSize(2, 1);
-    }
-
-    public void Vision() {
-        if (Constants.VisionConstants.USE_VISION) {
-            if (Robot.isReal()) {
-                aprilTagVision = new AprilTagVision(new AprilTagVisionIOPhotonVision());
-            } else {
-                aprilTagVision = new AprilTagVision(new AprilTagVisionIOPhotonVisionSIM(drivetrain::getCurrentPose2d));
-            }
-            aprilTagVision.setDataInterfaces(drivetrain::addVisionData);
-        }
     }
 
     private void startSimThread() {
@@ -326,7 +310,7 @@ public class CommandSwerveDrivetrain extends SwerveDrivetrain implements Subsyst
     // }
     @Override
     public void periodic() {
-        estimatedPose = m_odometry.getEstimatedPosition();
+        m_PhotonRunnable.run();
 
         SmartDashboard.putNumber("Gyro Angle", getgyroAngle());
         SmartDashboard.putNumber("X Pose", this.getState().Pose.getX());
